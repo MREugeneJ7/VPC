@@ -35,8 +35,8 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 	private static final long serialVersionUID = 1L;
 	private Entorno backEnd;
 	private JPanel panelContenido;
-	private JButton openImage;
-	private JLabel imagen, quieroVer;
+	private JButton openImage, histograma, color;
+	private JLabel imagen, datos;
 	private final JFileChooser fc = new JFileChooser();
 	private int j = 0;
 	ButtonGroup metodos;
@@ -57,7 +57,8 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 				File file = fc.getSelectedFile();
 				try {
 					backEnd = new Entorno(file.getAbsolutePath());
-					quieroVer.setText("abierto bro");
+					datos.setText("Tipo:" + backEnd.getType() + " Bits:" + backEnd.getBits()/3 + " " +  
+							backEnd.getImagen().getIconWidth() + "x" + backEnd.getImagen().getIconHeight());
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
@@ -65,6 +66,15 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 			} else {
 				System.out.println("Open command cancelled by user.");
 			}
+		} else if (e.getSource() == histograma) {
+			JFrame f = new JFrame("Histograma");
+	        f.add(backEnd.crearPanelHistograma(j));
+	        f.pack();
+	        f.setLocationRelativeTo(null);
+	        f.setVisible(true);
+		} else if(e.getSource() == color) {
+			if(j==0) j = 1;
+			else j = 0;
 		}
 		imagen.setIcon(backEnd.getImagen());
 		pack();
@@ -79,27 +89,38 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 		layout.setAutoCreateGaps(true);
 		layout.setAutoCreateContainerGaps(true);
 		openImage = new JButton("Abrir Imagen");
-		quieroVer = new JLabel("Cool");
+		histograma = new JButton("Mostrar Histograma");
+		color = new JButton ("color");
+		datos = new JLabel("");
 		imagen = new JLabel();
 		openImage.addActionListener(this);
+		histograma.addActionListener(this);
+		color.addActionListener(this);
 		layout.setHorizontalGroup(
 				layout.createParallelGroup(GroupLayout.Alignment.LEADING)
 				.addGroup(layout.createSequentialGroup()
 						.addComponent(openImage)
+						.addComponent(histograma)
+						.addComponent(color)
 						)
 				.addGroup(layout.createSequentialGroup()
 						.addComponent(imagen)
-						.addComponent(quieroVer)
 						)
+				.addGroup(layout.createSequentialGroup()
+						.addComponent(datos))
 				);
 		layout.setVerticalGroup(
 				layout.createSequentialGroup()
 				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
 						.addComponent(openImage)
+						.addComponent(histograma)
+						.addComponent(color)
 						)
 				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
 						.addComponent(imagen)
-						.addComponent(quieroVer)
+						)
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+						.addComponent(datos)
 						)
 				);
 		this.setContentPane(panelContenido);
