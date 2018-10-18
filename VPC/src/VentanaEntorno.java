@@ -30,13 +30,13 @@ import java.io.IOException;
  * @version 1.1.c 10/10/2017
  */
 
-public class VentanaEntorno extends JFrame implements ActionListener, TableModelListener, ChangeListener {
+public class VentanaEntorno extends JFrame implements ActionListener, TableModelListener, ChangeListener, MouseListener, MouseMotionListener {
 
 	private static final long serialVersionUID = 1L;
 	private Entorno backEnd;
 	private JPanel panelContenido;
 	private JButton openImage, histograma, color;
-	private JLabel imagen, datos;
+	private JLabel imagen, datos, posRaton;
 	private final JFileChooser fc = new JFileChooser();
 	private int j = 0;
 	ButtonGroup metodos;
@@ -92,10 +92,16 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 		histograma = new JButton("Mostrar Histograma");
 		color = new JButton ("color");
 		datos = new JLabel("");
+		posRaton = new JLabel("");
 		imagen = new JLabel();
+		
 		openImage.addActionListener(this);
 		histograma.addActionListener(this);
 		color.addActionListener(this);
+		
+		imagen.addMouseListener(this);
+		imagen.addMouseMotionListener(this);
+		
 		layout.setHorizontalGroup(
 				layout.createParallelGroup(GroupLayout.Alignment.LEADING)
 				.addGroup(layout.createSequentialGroup()
@@ -107,7 +113,9 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 						.addComponent(imagen)
 						)
 				.addGroup(layout.createSequentialGroup()
-						.addComponent(datos))
+						.addComponent(datos)
+						.addComponent(posRaton)
+						)
 				);
 		layout.setVerticalGroup(
 				layout.createSequentialGroup()
@@ -121,6 +129,7 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 						)
 				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
 						.addComponent(datos)
+						.addComponent(posRaton)
 						)
 				);
 		this.setContentPane(panelContenido);
@@ -145,5 +154,47 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 	@Override
 	public void stateChanged(ChangeEvent e) {
 	    }
+
+	@Override
+	public void mouseClicked(MouseEvent e) {
+		// TODO Auto-generated method stub
+		Color fg = new Color((float)Math.random(), (float)Math.random(), (float)Math.random());
+		posRaton.setForeground(fg);;
+		
+	}
+
+	@Override
+	public void mousePressed(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseExited(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	public void mouseMoved(MouseEvent e){
+		posRaton.setText("| X:" + e.getX() + " Y:" + e.getY());
+	}
+
+	@Override
+	public void mouseDragged(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
 		
 }
