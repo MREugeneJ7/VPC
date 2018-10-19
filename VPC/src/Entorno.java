@@ -1,6 +1,7 @@
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Paint;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
 import java.io.File;
@@ -27,9 +28,10 @@ public class Entorno {
 	private ImageIcon imagen;
 	private BufferedImage imagenBf;
 	private String direccion,tipoImagen;
-	private int bits;
+	private int bits, color;
 	private HistogramDataset dataset;
 	private XYBarRenderer renderer;
+	private Linea seleccion;
 
 	public Entorno(String absolutePath) throws IOException {
 		direccion = absolutePath;
@@ -37,6 +39,7 @@ public class Entorno {
 		tipoImagen = direccion.substring(direccion.lastIndexOf('.'));
 		imagenBf = ImageIO.read(new File(direccion));
 		bits = imagenBf.getColorModel().getPixelSize();
+		seleccion = new Linea(imagenBf.getHeight()*imagenBf.getWidth());
 	}
 
 	public Entorno() {
@@ -120,6 +123,54 @@ public class Entorno {
 	public Object getRenderer() {
 		// TODO Auto-generated method stub
 		return renderer;
+	}
+
+	public void guardarSeleccion(MouseEvent e) {
+		// TODO Auto-generated method stub
+		seleccion.add(e.getX(),e.getY());
+		
+	}
+
+	public void borrarSeleccion() {
+		// TODO Auto-generated method stub
+		seleccion = new Linea(imagenBf.getHeight()*imagenBf.getWidth());
+		
+	}
+
+	public void mostrarSeleccion() throws IOException {
+		// TODO Auto-generated method stub
+		imagen = new ImageIcon(imagenBf);
+		BufferedImage imgaux = ImageIO.read(new File(direccion));
+		for(int i=0; i< seleccion.getLastIndex();i++) {
+			Coordenada aux = seleccion.getCoordenada(i);
+			imgaux.setRGB(aux.getX(), aux.getY(), 0);
+		}
+		imagen = new ImageIcon(imgaux);
+	}
+
+	public boolean seleccionVacia() {
+		// TODO Auto-generated method stub
+		return (seleccion.getLastIndex() == 0);
+	}
+
+	public void psicoldelia() {
+		// TODO Auto-generated method stub
+		for(int i = 0; i < imagenBf.getWidth();i++) {
+			for(int j =0; j < imagenBf.getHeight();j++) {
+				color = (-1)*imagenBf.getRGB(i,j);
+				if(color >  256 * 256 + 256 ){
+					color = imagenBf.getRGB(i, j);
+				} else {
+					color = (int)((int) (Math.random()*256) * 256 * 256 +
+							(int) (Math.random()*256) * 256 + 
+							(int) (Math.random()*256))/2 +
+							((int)imagenBf.getRGB(i, j)/2);
+				}
+				
+				imagenBf.setRGB(i, j, color);
+			}
+		}
+		imagen = new ImageIcon(imagenBf);
 	}
 
 }

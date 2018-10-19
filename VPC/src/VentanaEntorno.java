@@ -158,8 +158,9 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 	@Override
 	public void mouseClicked(MouseEvent e) {
 		// TODO Auto-generated method stub
-		Color fg = new Color((float)Math.random(), (float)Math.random(), (float)Math.random());
-		posRaton.setForeground(fg);;
+		backEnd.psicoldelia();
+		imagen.setIcon(backEnd.getImagen());
+		
 		
 	}
 
@@ -172,6 +173,14 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 	@Override
 	public void mouseReleased(MouseEvent e) {
 		// TODO Auto-generated method stub
+		try {
+			backEnd.mostrarSeleccion();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		imagen.setIcon(backEnd.getImagen());
+		backEnd.borrarSeleccion();
 		
 	}
 
@@ -194,6 +203,7 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 	@Override
 	public void mouseDragged(MouseEvent e) {
 		// TODO Auto-generated method stub
+		backEnd.guardarSeleccion(e);
 		
 	}
 		
