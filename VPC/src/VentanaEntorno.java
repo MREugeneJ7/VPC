@@ -37,6 +37,7 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 	private JPanel panelContenido;
 	private JButton openImage, histograma, color;
 	private JLabel imagen, datos, posRaton;
+	private JComboBox transformacionesLineales;
 	private final JFileChooser fc = new JFileChooser();
 	private int j = 0;
 	ButtonGroup metodos;
@@ -75,6 +76,14 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 		} else if(e.getSource() == color) {
 			if(j==0) j = 1;
 			else j = 0;
+		} else if(e.getSource() == transformacionesLineales) {
+			if((transformacionesLineales.getSelectedItem()).equals("brillo")){
+				JFrame f = new JFrame("Brillo");
+		        f.add(backEnd.crearPaneBrillo());
+		        f.pack();
+		        f.setLocationRelativeTo(null);
+		        f.setVisible(true);
+			}
 		}
 		imagen.setIcon(backEnd.getImagen());
 		pack();
@@ -94,12 +103,16 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 		datos = new JLabel("");
 		posRaton = new JLabel("");
 		imagen = new JLabel();
+		String[] listado = {"brillo"};
+		transformacionesLineales = new JComboBox(listado);
 		
 		openImage.addActionListener(this);
 		histograma.addActionListener(this);
 		color.addActionListener(this);
+		transformacionesLineales.addActionListener(this);
 		
 		imagen.addMouseListener(this);
+		
 		imagen.addMouseMotionListener(this);
 		
 		layout.setHorizontalGroup(
@@ -108,6 +121,7 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 						.addComponent(openImage)
 						.addComponent(histograma)
 						.addComponent(color)
+						.addComponent(transformacionesLineales)
 						)
 				.addGroup(layout.createSequentialGroup()
 						.addComponent(imagen)
@@ -123,6 +137,7 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 						.addComponent(openImage)
 						.addComponent(histograma)
 						.addComponent(color)
+						.addComponent(transformacionesLineales)
 						)
 				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
 						.addComponent(imagen)
@@ -158,8 +173,9 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 	@Override
 	public void mouseClicked(MouseEvent e) {
 		// TODO Auto-generated method stub
-		backEnd.psicoldelia();
+		/*backEnd.psicoldelia();
 		imagen.setIcon(backEnd.getImagen());
+		*/
 		
 		
 	}
@@ -173,14 +189,14 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 	@Override
 	public void mouseReleased(MouseEvent e) {
 		// TODO Auto-generated method stub
-		try {
+		/*try {
 			backEnd.mostrarSeleccion();
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		imagen.setIcon(backEnd.getImagen());
-		backEnd.borrarSeleccion();
+		backEnd.borrarSeleccion(); */
 		
 	}
 
@@ -203,7 +219,7 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 	@Override
 	public void mouseDragged(MouseEvent e) {
 		// TODO Auto-generated method stub
-		backEnd.guardarSeleccion(e);
+		//backEnd.guardarSeleccion(e);
 		
 	}
 		

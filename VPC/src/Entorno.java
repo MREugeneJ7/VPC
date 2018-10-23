@@ -1,6 +1,8 @@
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Paint;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
@@ -10,8 +12,12 @@ import java.util.Arrays;
 
 import javax.imageio.ImageIO;
 import javax.print.DocFlavor.URL;
+import javax.swing.GroupLayout;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -23,7 +29,7 @@ import org.jfree.chart.renderer.xy.StandardXYBarPainter;
 import org.jfree.chart.renderer.xy.XYBarRenderer;
 import org.jfree.data.statistics.HistogramDataset;
 
-public class Entorno {
+public class Entorno implements ActionListener {
 	
 	private ImageIcon imagen;
 	private BufferedImage imagenBf;
@@ -32,6 +38,8 @@ public class Entorno {
 	private HistogramDataset dataset;
 	private XYBarRenderer renderer;
 	private Linea seleccion;
+	private JTextField valor;
+	private JButton aceptar;
 
 	public Entorno(String absolutePath) throws IOException {
 		direccion = absolutePath;
@@ -168,6 +176,66 @@ public class Entorno {
 				}
 				
 				imagenBf.setRGB(i, j, color);
+			}
+		}
+		imagen = new ImageIcon(imagenBf);
+	}
+
+	public Component crearPaneBrillo() {
+		JPanel panelContenido = new JPanel();
+		GroupLayout layout = new GroupLayout(panelContenido);
+		panelContenido.setLayout(layout);
+		layout.setAutoCreateGaps(true);
+		layout.setAutoCreateContainerGaps(true);
+		valor = new JTextField(10);
+		aceptar = new JButton("Aceptar");
+		
+		aceptar.addActionListener(this);
+		
+		layout.setHorizontalGroup(
+				layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+				.addGroup(layout.createSequentialGroup()
+						.addComponent(valor)
+						.addComponent(aceptar)
+						)
+				);
+		layout.setVerticalGroup(
+				layout.createSequentialGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+						.addComponent(valor)
+						.addComponent(aceptar)
+						)
+				);
+		
+		return panelContenido;
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		// TODO Auto-generated method stub
+		int brillo = Integer.parseInt(valor.getText());
+		cambiarBrillo(brillo);
+	}
+
+	private void cambiarBrillo(int brillo) {
+		// TODO Auto-generated method stub
+		for(int i = 0; i < imagenBf.getWidth();i++) {
+			for(int j =0; j < imagenBf.getHeight();j++) {
+				Color color = new Color(imagenBf.getRGB(i, j));
+				int red = color.getRed();
+				int blue = color.getBlue();
+				int green = color.getGreen();
+				red +=brillo;
+				blue += brillo;
+				green += brillo;
+				if(red < 0) red = 0;
+				if(red > 255) red = 255;
+				if(blue < 0) blue = 0;
+				if(blue > 255) blue = 255;
+				if(green < 0) green = 0;
+				if(green > 255) green = 255;
+				color = new Color(red, green, blue);
+				imagenBf.setRGB(i, j, color.getRGB());
 			}
 		}
 		imagen = new ImageIcon(imagenBf);
