@@ -18,6 +18,8 @@ import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.event.*;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
 
@@ -35,9 +37,10 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 	private static final long serialVersionUID = 1L;
 	private Entorno backEnd;
 	private JPanel panelContenido;
-	private JButton openImage, histograma, color;
+	private JButton openImage, histograma, color, aceptar;
 	private JLabel imagen, datos, posRaton;
 	private JComboBox transformacionesLineales;
+	private JTextField valor;
 	private final JFileChooser fc = new JFileChooser();
 	private int j = 0;
 	ButtonGroup metodos;
@@ -79,14 +82,46 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 		} else if(e.getSource() == transformacionesLineales) {
 			if((transformacionesLineales.getSelectedItem()).equals("brillo")){
 				JFrame f = new JFrame("Brillo");
-		        f.add(backEnd.crearPaneBrillo());
+		        f.add(crearPaneBrillo());
 		        f.pack();
 		        f.setLocationRelativeTo(null);
 		        f.setVisible(true);
 			}
+		} else if (e.getSource()==aceptar){
+			int brillo = Integer.parseInt(valor.getText());
+			backEnd.cambiarBrillo(brillo);
 		}
 		imagen.setIcon(backEnd.getImagen());
 		pack();
+	}
+
+	private Component crearPaneBrillo() {
+		JPanel panelContenido = new JPanel();
+		GroupLayout layout = new GroupLayout(panelContenido);
+		panelContenido.setLayout(layout);
+		layout.setAutoCreateGaps(true);
+		layout.setAutoCreateContainerGaps(true);
+		valor = new JTextField(10);
+		aceptar = new JButton("Aceptar");
+		
+		aceptar.addActionListener(this);
+		
+		layout.setHorizontalGroup(
+				layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+				.addGroup(layout.createSequentialGroup()
+						.addComponent(valor)
+						.addComponent(aceptar)
+						)
+				);
+		layout.setVerticalGroup(
+				layout.createSequentialGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+						.addComponent(valor)
+						.addComponent(aceptar)
+						)
+				);
+		
+		return panelContenido;
 	}
 
 	public VentanaEntorno(Entorno x) {
@@ -114,6 +149,7 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 		imagen.addMouseListener(this);
 		
 		imagen.addMouseMotionListener(this);
+		
 		
 		layout.setHorizontalGroup(
 				layout.createParallelGroup(GroupLayout.Alignment.LEADING)
@@ -172,11 +208,6 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 
 	@Override
 	public void mouseClicked(MouseEvent e) {
-		// TODO Auto-generated method stub
-		/*backEnd.psicoldelia();
-		imagen.setIcon(backEnd.getImagen());
-		*/
-		
 		
 	}
 
@@ -197,6 +228,8 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 		}
 		imagen.setIcon(backEnd.getImagen());
 		backEnd.borrarSeleccion(); */
+		imagen.setIcon(backEnd.getImagen());
+		pack();
 		
 	}
 
@@ -222,5 +255,8 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 		//backEnd.guardarSeleccion(e);
 		
 	}
+
+
+	
 		
 }

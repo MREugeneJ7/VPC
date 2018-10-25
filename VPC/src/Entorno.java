@@ -29,7 +29,7 @@ import org.jfree.chart.renderer.xy.StandardXYBarPainter;
 import org.jfree.chart.renderer.xy.XYBarRenderer;
 import org.jfree.data.statistics.HistogramDataset;
 
-public class Entorno implements ActionListener {
+public class Entorno  {
 	
 	private ImageIcon imagen;
 	private BufferedImage imagenBf;
@@ -38,8 +38,8 @@ public class Entorno implements ActionListener {
 	private HistogramDataset dataset;
 	private XYBarRenderer renderer;
 	private Linea seleccion;
-	private JTextField valor;
-	private JButton aceptar;
+	//private JTextField valor;
+	//private JButton aceptar;
 
 	public Entorno(String absolutePath) throws IOException {
 		direccion = absolutePath;
@@ -181,43 +181,10 @@ public class Entorno implements ActionListener {
 		imagen = new ImageIcon(imagenBf);
 	}
 
-	public Component crearPaneBrillo() {
-		JPanel panelContenido = new JPanel();
-		GroupLayout layout = new GroupLayout(panelContenido);
-		panelContenido.setLayout(layout);
-		layout.setAutoCreateGaps(true);
-		layout.setAutoCreateContainerGaps(true);
-		valor = new JTextField(10);
-		aceptar = new JButton("Aceptar");
-		
-		aceptar.addActionListener(this);
-		
-		layout.setHorizontalGroup(
-				layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-				.addGroup(layout.createSequentialGroup()
-						.addComponent(valor)
-						.addComponent(aceptar)
-						)
-				);
-		layout.setVerticalGroup(
-				layout.createSequentialGroup()
-				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-						.addComponent(valor)
-						.addComponent(aceptar)
-						)
-				);
-		
-		return panelContenido;
-	}
 
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		// TODO Auto-generated method stub
-		int brillo = Integer.parseInt(valor.getText());
-		cambiarBrillo(brillo);
-	}
 
-	private void cambiarBrillo(int brillo) {
+	
+	public void cambiarBrillo(int brillo) {
 		// TODO Auto-generated method stub
 		for(int i = 0; i < imagenBf.getWidth();i++) {
 			for(int j =0; j < imagenBf.getHeight();j++) {
