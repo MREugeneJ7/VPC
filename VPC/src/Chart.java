@@ -64,4 +64,4 @@ public class Chart extends JPanel {
     }
 }
 
-}
+
