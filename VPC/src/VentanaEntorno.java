@@ -12,16 +12,31 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.DefaultDrawingSupplier;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.StandardXYBarPainter;
+import org.jfree.chart.renderer.xy.XYBarRenderer;
+import org.jfree.data.statistics.HistogramDataset;
+
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Paint;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.event.*;
+import java.awt.image.Raster;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * IA Pract1
@@ -36,8 +51,8 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 
 	private static final long serialVersionUID = 1L;
 	private Entorno backEnd;
-	private JPanel panelContenido;
-	private JButton openImage, histograma, color, aceptar;
+	private JPanel panelContenido, panelHistograma;
+	private JButton openImage, histograma, color, acumulativo , aceptar;
 	private JLabel imagen, datos, posRaton;
 	private JComboBox transformacionesLineales;
 	private JTextField valor;
@@ -47,7 +62,9 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 	protected AudioFormat audioFormat;
 	protected AudioInputStream audioInputStream;
 	protected SourceDataLine sourceDataLine;
-	protected boolean stopPlayback = false;
+	protected boolean stopPlayback = false, isAcumulativo = false;
+	private XYBarRenderer renderer;
+	private JFrame h, b;
 	/**
 	 * Metodo que observa las acciones realizadas en la interfaz grafica
 	 * 
@@ -65,35 +82,114 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 							backEnd.getImagen().getIconWidth() + "x" + backEnd.getImagen().getIconHeight());
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block
-					e1.printStackTrace();
+					Aplicacion.logger.log(Level.WARNING, "No se pudo abrir la imagen", e1);
 				}
 			} else {
 				System.out.println("Open command cancelled by user.");
 			}
 		} else if (e.getSource() == histograma) {
-			JFrame f = new JFrame("Histograma");
-	        f.add(backEnd.crearPanelHistograma(j));
-	        f.pack();
-	        f.setLocationRelativeTo(null);
-	        f.setVisible(true);
+			h = new JFrame("Histograma");
+			panelHistograma = crearPanelHistograma();
+	        h.add(panelHistograma);
+	        h.pack();
+	        h.setLocationRelativeTo(null);
+	        h.setVisible(true);
 		} else if(e.getSource() == color) {
 			if(j==0) j = 1;
 			else j = 0;
 		} else if(e.getSource() == transformacionesLineales) {
 			if((transformacionesLineales.getSelectedItem()).equals("brillo")){
-				JFrame f = new JFrame("Brillo");
-		        f.add(crearPaneBrillo());
-		        f.pack();
-		        f.setLocationRelativeTo(null);
-		        f.setVisible(true);
+				b = new JFrame("Brillo");
+		        b.add(crearPaneBrillo());
+		        b.pack();
+		        b.setLocationRelativeTo(null);
+		        b.setVisible(true);
 			}
 		} else if (e.getSource()==aceptar){
 			int brillo = Integer.parseInt(valor.getText());
 			backEnd.cambiarBrillo(brillo);
+		} else if (e.getSource()==acumulativo) {
+			if(!isAcumulativo) isAcumulativo = true;
+			else isAcumulativo = false;
 		}
 		imagen.setIcon(backEnd.getImagen());
 		pack();
 	}
+
+	private ChartPanel crearPanelHistograma() {
+		// TODO Auto-generated method stub
+		HistogramDataset auxDataset = new HistogramDataset();
+        Raster raster = backEnd.getImagenBf().getRaster();
+        final int w = backEnd.getImagenBf().getWidth();
+        final int h = backEnd.getImagenBf().getHeight();
+        double[] r = new double[w * h +1];
+        if(!isAcumulativo) {
+	        if(j==1) { 
+	        r = raster.getSamples(0, 0, w, h, 0, r);
+	        auxDataset.addSeries("Red", r, 256);
+	        r = raster.getSamples(0, 0, w, h, 1, r);
+	        auxDataset.addSeries("Green", r, 256);
+	        r = raster.getSamples(0, 0, w, h, 2, r);
+	        auxDataset.addSeries("Blue", r, 256);
+	        backEnd.setDataset(auxDataset);
+	        }
+	        //Histograma a color
+	        if(j==0){
+	        	r = Arrays.stream(raster.getSamples(0, 0, w, h, 0, r)).map(i -> i * 0.33).toArray();
+	        	r = ArrayMaths.Add(r , Arrays.stream(raster.getSamples(0, 0, w, h, 1, r)).map(i -> i * 0.33).toArray());
+	        	r = ArrayMaths.Add(r , Arrays.stream(raster.getSamples(0, 0, w, h, 2, r)).map(i -> i * 0.33).toArray());
+	        	auxDataset.addSeries("Luminosidad", r, 256);
+	        	backEnd.setDataset(auxDataset);
+	        }
+        } else {
+        	if(j==1) { 
+    	        r = ArrayMaths.Acumulativo(raster.getSamples(0, 0, w, h, 0, r));
+    	        auxDataset.addSeries("Red", r, 256);
+    	        r = ArrayMaths.Acumulativo(raster.getSamples(0, 0, w, h, 1, r));
+    	        auxDataset.addSeries("Green", r, 256);
+    	        r = ArrayMaths.Acumulativo(raster.getSamples(0, 0, w, h, 2, r));
+    	        auxDataset.addSeries("Blue", r, 256);
+    	        backEnd.setDataset(auxDataset);
+    	        }
+    	        //Histograma a color
+    	        if(j==0){
+    	        	r = Arrays.stream(raster.getSamples(0, 0, w, h, 0, r)).map(i -> i * 0.33).toArray();
+    	        	r = ArrayMaths.Add(r , Arrays.stream(raster.getSamples(0, 0, w, h, 1, r)).map(i -> i * 0.33).toArray());
+    	        	r = ArrayMaths.Add(r , Arrays.stream(raster.getSamples(0, 0, w, h, 2, r)).map(i -> i * 0.33).toArray());
+    	        	r = ArrayMaths.Acumulativo(r);
+    	        	auxDataset.addSeries("Luminosidad", r, 256);
+    	        	backEnd.setDataset(auxDataset);
+    	        }
+
+        }
+        JFreeChart chart = ChartFactory.createHistogram("Histogram", "Value",
+                "Count", auxDataset, PlotOrientation.VERTICAL, true, true, false);
+            XYPlot plot = (XYPlot) chart.getPlot();
+            renderer = (XYBarRenderer) plot.getRenderer();
+            renderer.setBarPainter(new StandardXYBarPainter());
+            // translucent red, green & blue
+            Paint[] paintArray = {
+                
+            	new Color(0x80ff0000, true),
+               	new Color(0x8000ff00, true),
+               	new Color(0x800000ff, true)
+                //Colores color
+            };
+            Paint[] black = {new Color(0xff000000, true)};
+            if(j==0) paintArray = black; 
+            
+            plot.setDrawingSupplier(new DefaultDrawingSupplier(
+                paintArray,
+                DefaultDrawingSupplier.DEFAULT_FILL_PAINT_SEQUENCE,
+                DefaultDrawingSupplier.DEFAULT_OUTLINE_PAINT_SEQUENCE,
+                DefaultDrawingSupplier.DEFAULT_STROKE_SEQUENCE,
+                DefaultDrawingSupplier.DEFAULT_OUTLINE_STROKE_SEQUENCE,
+                DefaultDrawingSupplier.DEFAULT_SHAPE_SEQUENCE));
+            ChartPanel panel = new ChartPanel(chart);
+            panel.setMouseWheelEnabled(true);
+            return panel;
+	}
+	
 
 	private Component crearPaneBrillo() {
 		JPanel panelContenido = new JPanel();
@@ -135,6 +231,7 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 		openImage = new JButton("Abrir Imagen");
 		histograma = new JButton("Mostrar Histograma");
 		color = new JButton ("color");
+		acumulativo = new JButton("H. Acum");
 		datos = new JLabel("");
 		posRaton = new JLabel("");
 		imagen = new JLabel();
@@ -144,6 +241,7 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 		openImage.addActionListener(this);
 		histograma.addActionListener(this);
 		color.addActionListener(this);
+		acumulativo.addActionListener(this);
 		transformacionesLineales.addActionListener(this);
 		
 		imagen.addMouseListener(this);
@@ -157,6 +255,7 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 						.addComponent(openImage)
 						.addComponent(histograma)
 						.addComponent(color)
+						.addComponent(acumulativo)
 						.addComponent(transformacionesLineales)
 						)
 				.addGroup(layout.createSequentialGroup()
@@ -173,6 +272,7 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 						.addComponent(openImage)
 						.addComponent(histograma)
 						.addComponent(color)
+						.addComponent(acumulativo)
 						.addComponent(transformacionesLineales)
 						)
 				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
