@@ -68,5 +68,10 @@ public class ArrayMaths {
 		for(int i = 0; i < intensidad.length; i++) intensidad[i] = j;
 		return intensidad;
 	}
+	
+	static double[] multiply(double[]x, double d) {
+		for(int i = 0; i < x.length; i++) x[i] = x[i] * d;
+		return x;
+	}
 
 }

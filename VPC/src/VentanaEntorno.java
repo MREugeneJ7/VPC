@@ -52,7 +52,7 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 	private static final long serialVersionUID = 1L;
 	private Entorno backEnd;
 	private JPanel panelContenido, panelHistograma;
-	private JButton openImage, histograma, color, acumulativo , aceptar;
+	private JButton openImage, histograma, color, acumulativo , aceptar, aceptar1;
 	private JLabel imagen, datos, posRaton;
 	private JComboBox transformacionesLineales;
 	private JTextField valor;
@@ -64,7 +64,7 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 	protected SourceDataLine sourceDataLine;
 	protected boolean stopPlayback = false, isAcumulativo = false;
 	private XYBarRenderer renderer;
-	private JFrame h, b;
+	private JFrame h, b, c;
 	/**
 	 * Metodo que observa las acciones realizadas en la interfaz grafica
 	 * 
@@ -104,11 +104,21 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 		        b.pack();
 		        b.setLocationRelativeTo(null);
 		        b.setVisible(true);
+			} else {
+				c = new JFrame("Contraste");
+		        c.add(crearPaneContraste());
+		        c.pack();
+		        c.setLocationRelativeTo(null);
+		        c.setVisible(true);
 			}
 		} else if (e.getSource()==aceptar){
 			int brillo = Integer.parseInt(valor.getText());
 			backEnd.cambiarBrillo(brillo);
-		} else if (e.getSource()==acumulativo) {
+		} else if (e.getSource()==aceptar1) {
+			float contraste = Float.parseFloat(valor.getText());
+			backEnd.cambiarContraste(contraste);
+		}
+		else if (e.getSource()==acumulativo) {
 			if(!isAcumulativo) isAcumulativo = true;
 			else isAcumulativo = false;
 		}
@@ -116,7 +126,36 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 		pack();
 	}
 
-	private Chart crearPanelHistograma() {
+	private Component crearPaneContraste() {
+		JPanel panelContenido = new JPanel();
+		GroupLayout layout = new GroupLayout(panelContenido);
+		panelContenido.setLayout(layout);
+		layout.setAutoCreateGaps(true);
+		layout.setAutoCreateContainerGaps(true);
+		valor = new JTextField(10);
+		aceptar1 = new JButton("Aceptar");
+		
+		aceptar1.addActionListener(this);
+		
+		layout.setHorizontalGroup(
+				layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+				.addGroup(layout.createSequentialGroup()
+						.addComponent(valor)
+						.addComponent(aceptar1)
+						)
+				);
+		layout.setVerticalGroup(
+				layout.createSequentialGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+						.addComponent(valor)
+						.addComponent(aceptar1)
+						)
+				);
+		
+		return panelContenido;
+	}
+
+	private ChartPanel crearPanelHistograma() {
 		// TODO Auto-generated method stub
 		HistogramDataset auxDataset = new HistogramDataset();
         Raster raster = backEnd.getImagenBf().getRaster();
@@ -135,9 +174,9 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 	        }
 	        //Histograma a color
 	        if(j==0){
-	        	r = Arrays.stream(raster.getSamples(0, 0, w, h, 0, r)).map(i -> i * 0.33).toArray();
-	        	r = ArrayMaths.Add(r , Arrays.stream(raster.getSamples(0, 0, w, h, 1, r)).map(i -> i * 0.33).toArray());
-	        	r = ArrayMaths.Add(r , Arrays.stream(raster.getSamples(0, 0, w, h, 2, r)).map(i -> i * 0.33).toArray());
+	        	r = ArrayMaths.multiply(raster.getSamples(0, 0, w, h, 0, r),0.33);
+	        	r = ArrayMaths.Add(r , ArrayMaths.multiply(raster.getSamples(0, 0, w, h, 1, r),0.33));
+	        	r = ArrayMaths.Add(r , ArrayMaths.multiply(raster.getSamples(0, 0, w, h, 2, r),0.33));
 	        	auxDataset.addSeries("Luminosidad", r, 256);
 	        	backEnd.setDataset(auxDataset);
 	        }
@@ -163,8 +202,32 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 
         }
        
-            //Chart panel = new Chart();
-            return null;
+        JFreeChart chart = ChartFactory.createHistogram("Histogram", "Value",
+                "Count", backEnd.getDataSet(), PlotOrientation.VERTICAL, true, true, false);
+            XYPlot plot = (XYPlot) chart.getPlot();
+            renderer = (XYBarRenderer) plot.getRenderer();
+            renderer.setBarPainter(new StandardXYBarPainter());
+            // translucent red, green & blue
+            Paint[] paintArray = {
+                
+            	new Color(0x80ff0000, true),
+               	new Color(0x8000ff00, true),
+               	new Color(0x800000ff, true)
+                //Colores color
+            };
+            Paint[] black = {new Color(0xff000000, true)};
+            if(j==0) paintArray = black; 
+            
+            plot.setDrawingSupplier(new DefaultDrawingSupplier(
+                paintArray,
+                DefaultDrawingSupplier.DEFAULT_FILL_PAINT_SEQUENCE,
+                DefaultDrawingSupplier.DEFAULT_OUTLINE_PAINT_SEQUENCE,
+                DefaultDrawingSupplier.DEFAULT_STROKE_SEQUENCE,
+                DefaultDrawingSupplier.DEFAULT_OUTLINE_STROKE_SEQUENCE,
+                DefaultDrawingSupplier.DEFAULT_SHAPE_SEQUENCE));
+            ChartPanel panel = new ChartPanel(chart);
+            panel.setMouseWheelEnabled(true);
+            return panel;
 	}
 	
 
@@ -212,7 +275,7 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 		datos = new JLabel("");
 		posRaton = new JLabel("");
 		imagen = new JLabel();
-		String[] listado = {"brillo"};
+		String[] listado = {"brillo","contraste"};
 		transformacionesLineales = new JComboBox(listado);
 		
 		openImage.addActionListener(this);

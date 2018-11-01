@@ -28,6 +28,7 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.StandardXYBarPainter;
 import org.jfree.chart.renderer.xy.XYBarRenderer;
 import org.jfree.data.statistics.HistogramDataset;
+import org.jfree.data.xy.IntervalXYDataset;
 
 public class Entorno  {
 	
@@ -66,7 +67,7 @@ public class Entorno  {
 		return bits;
 	}
 
-	public Object getDataSet() {
+	public IntervalXYDataset getDataSet() {
 		// TODO Auto-generated method stub
 		return dataset;
 	}
@@ -155,6 +156,30 @@ public class Entorno  {
 		// TODO Auto-generated method stub
 		dataset = auxDataset;
 		
+	}
+
+	public void cambiarContraste(float contraste) {
+		// TODO Auto-generated method stub
+		for(int i = 0; i < imagenBf.getWidth();i++) {
+			for(int j =0; j < imagenBf.getHeight();j++) {
+				Color color = new Color(imagenBf.getRGB(i, j));
+				int red = color.getRed();
+				int blue = color.getBlue();
+				int green = color.getGreen();
+				red *= contraste;
+				blue *= contraste;
+				green *= contraste;
+				if(red < 0) red = 0;
+				if(red > 255) red = 255;
+				if(blue < 0) blue = 0;
+				if(blue > 255) blue = 255;
+				if(green < 0) green = 0;
+				if(green > 255) green = 255;
+				color = new Color(red, green, blue);
+				imagenBf.setRGB(i, j, color.getRGB());
+			}
+		}
+		imagen = new ImageIcon(imagenBf);
 	}
 
 }
