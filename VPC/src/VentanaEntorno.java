@@ -143,11 +143,11 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 	        }
         } else {
         	if(j==1) { 
-    	        r = ArrayMaths.Acumulativo(raster.getSamples(0, 0, w, h, 0, r));
+    	        r = ArrayMaths.toDouble(ArrayMaths.HistogramaAcumulativo(raster.getSamples(0, 0, w, h, 0, r)));
     	        auxDataset.addSeries("Red", r, 256);
-    	        r = ArrayMaths.Acumulativo(raster.getSamples(0, 0, w, h, 1, r));
+    	        r = ArrayMaths.toDouble(ArrayMaths.HistogramaAcumulativo(raster.getSamples(0, 0, w, h, 1, r)));
     	        auxDataset.addSeries("Green", r, 256);
-    	        r = ArrayMaths.Acumulativo(raster.getSamples(0, 0, w, h, 2, r));
+    	        r = ArrayMaths.toDouble(ArrayMaths.HistogramaAcumulativo(raster.getSamples(0, 0, w, h, 2, r)));
     	        auxDataset.addSeries("Blue", r, 256);
     	        backEnd.setDataset(auxDataset);
     	        }
@@ -156,15 +156,15 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
     	        	r = Arrays.stream(raster.getSamples(0, 0, w, h, 0, r)).map(i -> i * 0.33).toArray();
     	        	r = ArrayMaths.Add(r , Arrays.stream(raster.getSamples(0, 0, w, h, 1, r)).map(i -> i * 0.33).toArray());
     	        	r = ArrayMaths.Add(r , Arrays.stream(raster.getSamples(0, 0, w, h, 2, r)).map(i -> i * 0.33).toArray());
-    	        	r = ArrayMaths.Acumulativo(r);
+    	        	r = ArrayMaths.toDouble(ArrayMaths.HistogramaAcumulativo(r));
     	        	auxDataset.addSeries("Luminosidad", r, 256);
     	        	backEnd.setDataset(auxDataset);
     	        }
 
         }
        
-            Chart panel = new Chart();
-            return panel;
+            //Chart panel = new Chart();
+            return null;
 	}
 	
 

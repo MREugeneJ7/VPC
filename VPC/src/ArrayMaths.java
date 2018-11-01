@@ -24,7 +24,7 @@ public class ArrayMaths {
 		return Acumulativo(Histograma(samples));
 	}
 	
-	private static double[] toDouble(long[] intensidad) {
+	static double[] toDouble(long[] intensidad) {
 		double[] x = new double[intensidad.length];
 		for(int i = 0; i < x.length ; i++) x[i] = (double) intensidad[i];
 		return x;
