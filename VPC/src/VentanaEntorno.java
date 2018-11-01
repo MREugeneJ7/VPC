@@ -116,7 +116,7 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 		pack();
 	}
 
-	private ChartPanel crearPanelHistograma() {
+	private Chart crearPanelHistograma() {
 		// TODO Auto-generated method stub
 		HistogramDataset auxDataset = new HistogramDataset();
         Raster raster = backEnd.getImagenBf().getRaster();
@@ -162,31 +162,8 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
     	        }
 
         }
-        JFreeChart chart = ChartFactory.createHistogram("Histogram", "Value",
-                "Count", auxDataset, PlotOrientation.VERTICAL, true, true, false);
-            XYPlot plot = (XYPlot) chart.getPlot();
-            renderer = (XYBarRenderer) plot.getRenderer();
-            renderer.setBarPainter(new StandardXYBarPainter());
-            // translucent red, green & blue
-            Paint[] paintArray = {
-                
-            	new Color(0x80ff0000, true),
-               	new Color(0x8000ff00, true),
-               	new Color(0x800000ff, true)
-                //Colores color
-            };
-            Paint[] black = {new Color(0xff000000, true)};
-            if(j==0) paintArray = black; 
-            
-            plot.setDrawingSupplier(new DefaultDrawingSupplier(
-                paintArray,
-                DefaultDrawingSupplier.DEFAULT_FILL_PAINT_SEQUENCE,
-                DefaultDrawingSupplier.DEFAULT_OUTLINE_PAINT_SEQUENCE,
-                DefaultDrawingSupplier.DEFAULT_STROKE_SEQUENCE,
-                DefaultDrawingSupplier.DEFAULT_OUTLINE_STROKE_SEQUENCE,
-                DefaultDrawingSupplier.DEFAULT_SHAPE_SEQUENCE));
-            ChartPanel panel = new ChartPanel(chart);
-            panel.setMouseWheelEnabled(true);
+       
+            Chart panel = new Chart();
             return panel;
 	}
 	

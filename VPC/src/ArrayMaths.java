@@ -7,7 +7,7 @@ public class ArrayMaths {
 		return r;
 	}
 
-	public static double[] Acumulativo(double[] samples) {
+	public static long[] Histograma(double[] samples) {
 		// TODO Auto-generated method stub
 		long intensidad[];
 		intensidad = new long[max(samples)+1];
@@ -17,13 +17,11 @@ public class ArrayMaths {
 			intensidad[(int) samples[k]]++;
 			//System.out.println((int)samples[k]);
 		}
-		intensidad = Acumulativo(intensidad);
-		for(int i = 0 ; i < intensidad.length ; i++) System.out.println(i + "," + intensidad[i]);
-		double[] raster = new double[0];
-		for(int k = 0; k < intensidad.length; k++ ) {
-			raster = append(raster, put(k , new double[(int) intensidad[k]]));
-		}
-		return raster;
+		return intensidad;
+	}
+	
+	public static long[] HistogramaAcumulativo(double[] samples) {
+		return Acumulativo(Histograma(samples));
 	}
 	
 	private static double[] toDouble(long[] intensidad) {
