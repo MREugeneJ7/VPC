@@ -52,10 +52,10 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 	private static final long serialVersionUID = 1L;
 	private Entorno backEnd;
 	private JPanel panelContenido, panelHistograma;
-	private JButton openImage, histograma, color, acumulativo , aceptar, aceptar1;
+	private JButton openImage, histograma, color, acumulativo , aceptar, aceptar1, aceptar2;
 	private JLabel imagen, datos, posRaton;
 	private JComboBox transformacionesLineales;
-	private JTextField valor;
+	private JTextField valor, valor1;
 	private final JFileChooser fc = new JFileChooser();
 	private int j = 0;
 	ButtonGroup metodos;
@@ -64,7 +64,7 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 	protected SourceDataLine sourceDataLine;
 	protected boolean stopPlayback = false, isAcumulativo = false;
 	private XYBarRenderer renderer;
-	private JFrame h, b, c;
+	private JFrame h, b, c, tf;
 	/**
 	 * Metodo que observa las acciones realizadas en la interfaz grafica
 	 * 
@@ -104,18 +104,29 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 		        b.pack();
 		        b.setLocationRelativeTo(null);
 		        b.setVisible(true);
-			} else {
+			} else if((transformacionesLineales.getSelectedItem()).equals("contraste")) {
 				c = new JFrame("Contraste");
 		        c.add(crearPaneContraste());
 		        c.pack();
 		        c.setLocationRelativeTo(null);
 		        c.setVisible(true);
+			}else {
+				tf = new JFrame("Transformación lineal");
+		        tf.add(crearPaneTL());
+		        tf.pack();
+		        tf.setLocationRelativeTo(null);
+		        tf.setVisible(true);
 			}
 		} else if (e.getSource()==aceptar){
 			int brillo = Integer.parseInt(valor.getText());
 			backEnd.cambiarBrillo(brillo);
 		} else if (e.getSource()==aceptar1) {
 			float contraste = Float.parseFloat(valor.getText());
+			backEnd.cambiarContraste(contraste);
+		} else if (e.getSource() == aceptar2){
+			int brillo = Integer.parseInt(valor.getText());
+			float contraste = Float.parseFloat(valor1.getText());
+			backEnd.cambiarBrillo(brillo);
 			backEnd.cambiarContraste(contraste);
 		}
 		else if (e.getSource()==acumulativo) {
@@ -124,6 +135,48 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 		}
 		imagen.setIcon(backEnd.getImagen());
 		pack();
+	}
+
+	private Component crearPaneTL() {
+		JPanel panelContenido = new JPanel();
+		GroupLayout layout = new GroupLayout(panelContenido);
+		panelContenido.setLayout(layout);
+		layout.setAutoCreateGaps(true);
+		layout.setAutoCreateContainerGaps(true);
+		valor = new JTextField(10);
+		valor1 = new JTextField(10);
+		JLabel v1 = new JLabel("V1:");
+		JLabel v0 = new JLabel(" + V0* ");
+		aceptar2 = new JButton("Aceptar");
+		
+		aceptar2.addActionListener(this);
+		
+		layout.setHorizontalGroup(
+				layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+				.addGroup(layout.createSequentialGroup()
+						.addGroup(layout.createSequentialGroup()
+								.addComponent(v1)
+								.addComponent(valor)
+								.addComponent(v0)
+								.addComponent(valor1)
+						)
+						.addComponent(aceptar2)
+						)
+				);
+		layout.setVerticalGroup(
+				layout.createSequentialGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+						.addComponent(v1)
+						.addComponent(valor)
+						.addComponent(v0)
+						.addComponent(valor1)
+					)
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+						.addComponent(aceptar2)
+					)
+				);
+		
+		return panelContenido;
 	}
 
 	private Component crearPaneContraste() {
@@ -275,7 +328,7 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 		datos = new JLabel("");
 		posRaton = new JLabel("");
 		imagen = new JLabel();
-		String[] listado = {"brillo","contraste"};
+		String[] listado = {"brillo","contraste", "Transformacion Lineal"};
 		transformacionesLineales = new JComboBox(listado);
 		
 		openImage.addActionListener(this);
