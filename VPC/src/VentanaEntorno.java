@@ -25,10 +25,12 @@ import org.jfree.data.statistics.HistogramDataset;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Image;
 import java.awt.Paint;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.event.*;
+import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -52,9 +54,9 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 	private static final long serialVersionUID = 1L;
 	private Entorno backEnd;
 	private JPanel panelContenido, panelHistograma;
-	private JButton openImage, histograma, color, acumulativo , aceptar, aceptar1, aceptar2;
+	private JButton openImage, histograma, color, acumulativo , aceptar, aceptar1, aceptar2, aceptar3;
 	private JLabel imagen, datos, posRaton;
-	private JComboBox transformacionesLineales;
+	private JComboBox transformacionesLineales, transformacionesNoLineales;
 	private JTextField valor, valor1;
 	private final JFileChooser fc = new JFileChooser();
 	private int j = 0;
@@ -64,7 +66,7 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 	protected SourceDataLine sourceDataLine;
 	protected boolean stopPlayback = false, isAcumulativo = false;
 	private XYBarRenderer renderer;
-	private JFrame h, b, c, tf;
+	private JFrame h, b, c, tf, g;
 	/**
 	 * Metodo que observa las acciones realizadas en la interfaz grafica
 	 * 
@@ -128,13 +130,51 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 			float contraste = Float.parseFloat(valor1.getText());
 			backEnd.cambiarBrillo(brillo);
 			backEnd.cambiarContraste(contraste);
+		}else if(e.getSource()==aceptar3){
+			double gamma = Double.parseDouble(valor.getText());
+			backEnd.gamma(gamma);
 		}
 		else if (e.getSource()==acumulativo) {
 			if(!isAcumulativo) isAcumulativo = true;
 			else isAcumulativo = false;
+		}else if(e.getSource()==transformacionesNoLineales){
+			g = new JFrame("Gamma");
+	        g.add(crearPanelGamma());
+	        g.pack();
+	        g.setLocationRelativeTo(null);
+	        g.setVisible(true);
 		}
 		imagen.setIcon(backEnd.getImagen());
 		pack();
+	}
+
+	private Component crearPanelGamma() {
+		JPanel panelContenido = new JPanel();
+		GroupLayout layout = new GroupLayout(panelContenido);
+		panelContenido.setLayout(layout);
+		layout.setAutoCreateGaps(true);
+		layout.setAutoCreateContainerGaps(true);
+		valor = new JTextField(10);
+		aceptar3 = new JButton("Aceptar");
+		
+		aceptar3.addActionListener(this);
+		
+		layout.setHorizontalGroup(
+				layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+				.addGroup(layout.createSequentialGroup()
+						.addComponent(valor)
+						.addComponent(aceptar3)
+						)
+				);
+		layout.setVerticalGroup(
+				layout.createSequentialGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+						.addComponent(valor)
+						.addComponent(aceptar3)
+						)
+				);
+		
+		return panelContenido;
 	}
 
 	private Component crearPaneTL() {
@@ -330,12 +370,15 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 		imagen = new JLabel();
 		String[] listado = {"brillo","contraste", "Transformacion Lineal"};
 		transformacionesLineales = new JComboBox(listado);
+		String[] listado1 = {"Gamma"};
+		transformacionesNoLineales = new JComboBox(listado1);
 		
 		openImage.addActionListener(this);
 		histograma.addActionListener(this);
 		color.addActionListener(this);
 		acumulativo.addActionListener(this);
 		transformacionesLineales.addActionListener(this);
+		transformacionesNoLineales.addActionListener(this);
 		
 		imagen.addMouseListener(this);
 		
@@ -350,6 +393,7 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 						.addComponent(color)
 						.addComponent(acumulativo)
 						.addComponent(transformacionesLineales)
+						.addComponent(transformacionesNoLineales)
 						)
 				.addGroup(layout.createSequentialGroup()
 						.addComponent(imagen)
@@ -367,6 +411,7 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 						.addComponent(color)
 						.addComponent(acumulativo)
 						.addComponent(transformacionesLineales)
+						.addComponent(transformacionesNoLineales)
 						)
 				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
 						.addComponent(imagen)
