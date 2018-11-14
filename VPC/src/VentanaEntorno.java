@@ -56,7 +56,7 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 	private JPanel panelContenido, panelHistograma;
 	private JButton openImage, histograma, color, acumulativo , aceptar, aceptar1, aceptar2, aceptar3;
 	private JLabel imagen, datos, posRaton;
-	private JComboBox transformacionesLineales, transformacionesNoLineales;
+	private JComboBox transformacionesLineales, transformacionesNoLineales, operacionesHistograma;
 	private JTextField valor, valor1;
 	private final JFileChooser fc = new JFileChooser();
 	private int j = 0;
@@ -113,7 +113,7 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 		        c.setLocationRelativeTo(null);
 		        c.setVisible(true);
 			}else {
-				tf = new JFrame("Transformación lineal");
+				tf = new JFrame("Transformacion lineal");
 		        tf.add(crearPaneTL());
 		        tf.pack();
 		        tf.setLocationRelativeTo(null);
@@ -143,6 +143,8 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 	        g.pack();
 	        g.setLocationRelativeTo(null);
 	        g.setVisible(true);
+		}else if(e.getSource()==operacionesHistograma) {
+			backEnd.ecualizar();
 		}
 		imagen.setIcon(backEnd.getImagen());
 		pack();
@@ -372,6 +374,8 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 		transformacionesLineales = new JComboBox(listado);
 		String[] listado1 = {"Gamma"};
 		transformacionesNoLineales = new JComboBox(listado1);
+		String[] listado2 = {"Ecualizar"};
+		operacionesHistograma = new JComboBox(listado2);
 		
 		openImage.addActionListener(this);
 		histograma.addActionListener(this);
@@ -379,6 +383,7 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 		acumulativo.addActionListener(this);
 		transformacionesLineales.addActionListener(this);
 		transformacionesNoLineales.addActionListener(this);
+		operacionesHistograma.addActionListener(this);
 		
 		imagen.addMouseListener(this);
 		
@@ -394,6 +399,7 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 						.addComponent(acumulativo)
 						.addComponent(transformacionesLineales)
 						.addComponent(transformacionesNoLineales)
+						.addComponent(operacionesHistograma)
 						)
 				.addGroup(layout.createSequentialGroup()
 						.addComponent(imagen)
@@ -412,6 +418,7 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 						.addComponent(acumulativo)
 						.addComponent(transformacionesLineales)
 						.addComponent(transformacionesNoLineales)
+						.addComponent(operacionesHistograma)
 						)
 				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
 						.addComponent(imagen)
