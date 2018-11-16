@@ -9,6 +9,7 @@ import java.awt.image.Raster;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.logging.Level;
 
 import javax.imageio.ImageIO;
 import javax.print.DocFlavor.URL;
@@ -277,6 +278,33 @@ public class Entorno  {
 	    		}
 	    	}
 	    imagen = new ImageIcon(imagenBf);
+	}
+
+	public void calcularDiferencia(String path, int umbral) throws IOException {
+		// TODO Auto-generated method stub
+		int r, g, b;
+		BufferedImage imagenCalculo;
+		imagenCalculo = ImageIO.read(new File(path));
+		for(int i = 0; i < imagenBf.getWidth();i++) {
+			for(int j =0; j < imagenBf.getHeight();j++) {
+				Color color = new Color(imagenBf.getRGB(i, j));
+				Color color2 = new Color(0);
+				if((i >= imagenCalculo.getWidth()) || (j >= imagenCalculo.getHeight()))	color2 = color;
+				else color2 = new Color(imagenCalculo.getRGB(i, j));
+				if(color.getRed() - color2.getRed() <= umbral && color.getRed() - color2.getRed() >= -umbral) r = 0;
+				else r = color.getRed() - color2.getRed();
+				if(color.getGreen() - color2.getGreen() <= umbral && color.getGreen() - color2.getGreen() >= -umbral) g = 0;
+				else g = color.getGreen() - color2.getGreen();
+				if(color.getBlue() - color2.getBlue() <= umbral && color.getBlue() - color2.getBlue() >= -umbral) b = 0;
+				else b = color.getBlue() - color2.getBlue();
+				if(r < 0) r *= -1;
+				if(g < 0) g *= -1;
+				if(b < 0) b *= -1;
+				color = new Color(r,g,b);
+				imagenBf.setRGB(i, j, color.getRGB());
+			}
+		}
+		imagen = new ImageIcon(imagenBf);
 	}
 
 }

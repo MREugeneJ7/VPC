@@ -54,7 +54,7 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 	private static final long serialVersionUID = 1L;
 	private Entorno backEnd;
 	private JPanel panelContenido, panelHistograma;
-	private JButton openImage, histograma, color, acumulativo , aceptar, aceptar1, aceptar2, aceptar3;
+	private JButton openImage, histograma, color, acumulativo , aceptar, aceptar1, aceptar2, aceptar3, aceptar4, imagenDiferencia;
 	private JLabel imagen, datos, posRaton;
 	private JComboBox transformacionesLineales, transformacionesNoLineales, operacionesHistograma;
 	private JTextField valor, valor1;
@@ -66,7 +66,8 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 	protected SourceDataLine sourceDataLine;
 	protected boolean stopPlayback = false, isAcumulativo = false;
 	private XYBarRenderer renderer;
-	private JFrame h, b, c, tf, g;
+	private JFrame h, b, c, tf, g, d;
+	private String path;
 	/**
 	 * Metodo que observa las acciones realizadas en la interfaz grafica
 	 * 
@@ -79,6 +80,7 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
 				File file = fc.getSelectedFile();
 				try {
+					path = file.getAbsolutePath();
 					backEnd = new Entorno(file.getAbsolutePath());
 					datos.setText("Tipo:" + backEnd.getType() + " Bits:" + backEnd.getBits()/3 + " " +  
 							backEnd.getImagen().getIconWidth() + "x" + backEnd.getImagen().getIconHeight());
@@ -144,10 +146,66 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 	        g.setLocationRelativeTo(null);
 	        g.setVisible(true);
 		}else if(e.getSource()==operacionesHistograma) {
-			backEnd.ecualizar();
+			if((operacionesHistograma.getSelectedItem()).equals("Diferencia")) {
+				g = new JFrame("Diferencia");
+		        g.add(crearPanelDiferencia());
+		        g.pack();
+		        g.setLocationRelativeTo(null);
+		        g.setVisible(true);
+			}else	backEnd.ecualizar();
+		}else if(e.getSource() == imagenDiferencia) {
+			int returnVal = fc.showOpenDialog(panelContenido);
+
+			if (returnVal == JFileChooser.APPROVE_OPTION) {
+				File file = fc.getSelectedFile();
+					path = file.getAbsolutePath();
+			} else {
+				System.out.println("Open command cancelled by user.");
+			}
+		}else if(e.getSource() == aceptar4) {
+			int umbral = Integer.parseInt(valor.getText());
+			try {
+				backEnd.calcularDiferencia(path , umbral);
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				Aplicacion.logger.log(Level.WARNING, "No se pudo abrir la imagen", e1);
+			}
 		}
 		imagen.setIcon(backEnd.getImagen());
 		pack();
+	}
+
+	private Component crearPanelDiferencia() {
+		JPanel panelContenido = new JPanel();
+		GroupLayout layout = new GroupLayout(panelContenido);
+		panelContenido.setLayout(layout);
+		layout.setAutoCreateGaps(true);
+		layout.setAutoCreateContainerGaps(true);
+		valor = new JTextField(10);
+		imagenDiferencia = new JButton("Imagen");
+		aceptar4 = new JButton("Aceptar");
+		
+		aceptar4.addActionListener(this);
+		imagenDiferencia.addActionListener(this);
+		
+		layout.setHorizontalGroup(
+				layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+				.addGroup(layout.createSequentialGroup()
+						.addComponent(valor)
+						.addComponent(imagenDiferencia)
+						.addComponent(aceptar4)
+						)
+				);
+		layout.setVerticalGroup(
+				layout.createSequentialGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+						.addComponent(valor)
+						.addComponent(imagenDiferencia)
+						.addComponent(aceptar4)
+						)
+				);
+		
+		return panelContenido;
 	}
 
 	private Component crearPanelGamma() {
@@ -374,7 +432,7 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 		transformacionesLineales = new JComboBox(listado);
 		String[] listado1 = {"Gamma"};
 		transformacionesNoLineales = new JComboBox(listado1);
-		String[] listado2 = {"Ecualizar"};
+		String[] listado2 = {"Ecualizar" , "Diferencia"};
 		operacionesHistograma = new JComboBox(listado2);
 		
 		openImage.addActionListener(this);
