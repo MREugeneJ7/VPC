@@ -45,7 +45,7 @@ public class Entorno  {
 	public Entorno(String absolutePath) throws IOException {
 		direccion = absolutePath;
 		imagen = new ImageIcon(absolutePath);
-		tipoImagen = direccion.substring(direccion.lastIndexOf('.'));
+		tipoImagen = direccion.substring(direccion.lastIndexOf('.') + 1);
 		imagenBf = ImageIO.read(new File(direccion));
 		bits = imagenBf.getColorModel().getPixelSize();
 		seleccion = new Linea(imagenBf.getHeight()*imagenBf.getWidth());

@@ -1,3 +1,4 @@
+import javax.imageio.ImageIO;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
@@ -54,7 +55,7 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 	private static final long serialVersionUID = 1L;
 	private Entorno backEnd;
 	private JPanel panelContenido, panelHistograma;
-	private JButton openImage, histograma, color, acumulativo , aceptar, aceptar1, aceptar2, aceptar3, aceptar4, imagenDiferencia;
+	private JButton openImage, histograma, color, acumulativo , aceptar, aceptar1, aceptar2, aceptar3, aceptar4, imagenDiferencia, guardar;
 	private JLabel imagen, datos, posRaton;
 	private JComboBox transformacionesLineales, transformacionesNoLineales, operacionesHistograma;
 	private JTextField valor, valor1;
@@ -91,7 +92,21 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 			} else {
 				System.out.println("Open command cancelled by user.");
 			}
-		} else if (e.getSource() == histograma) {
+		} else if(e.getSource() == guardar){
+			int returnVal = fc.showSaveDialog(panelContenido);
+			if (returnVal == JFileChooser.APPROVE_OPTION) {
+				File file = fc.getSelectedFile();
+				try {
+					ImageIO.write(backEnd.getImagenBf(), backEnd.getType(), file);
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					Aplicacion.logger.log(Level.WARNING, "No se pudo abrir la imagen", e1);
+				}
+			} else {
+				System.out.println("Open command cancelled by user.");
+			}
+		}
+		else if (e.getSource() == histograma) {
 			h = new JFrame("Histograma");
 			panelHistograma = crearPanelHistograma();
 	        h.add(panelHistograma);
@@ -422,6 +437,7 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 		layout.setAutoCreateGaps(true);
 		layout.setAutoCreateContainerGaps(true);
 		openImage = new JButton("Abrir Imagen");
+		guardar = new JButton("Guardar");
 		histograma = new JButton("Mostrar Histograma");
 		color = new JButton ("color");
 		acumulativo = new JButton("H. Acum");
@@ -436,6 +452,7 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 		operacionesHistograma = new JComboBox(listado2);
 		
 		openImage.addActionListener(this);
+		guardar.addActionListener(this);
 		histograma.addActionListener(this);
 		color.addActionListener(this);
 		acumulativo.addActionListener(this);
@@ -451,7 +468,9 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 		layout.setHorizontalGroup(
 				layout.createParallelGroup(GroupLayout.Alignment.LEADING)
 				.addGroup(layout.createSequentialGroup()
-						.addComponent(openImage)
+						.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+								.addComponent(openImage)
+								.addComponent(guardar))
 						.addComponent(histograma)
 						.addComponent(color)
 						.addComponent(acumulativo)
@@ -470,7 +489,9 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 		layout.setVerticalGroup(
 				layout.createSequentialGroup()
 				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-						.addComponent(openImage)
+						.addGroup(layout.createSequentialGroup()
+								.addComponent(openImage)
+								.addComponent(guardar))
 						.addComponent(histograma)
 						.addComponent(color)
 						.addComponent(acumulativo)
