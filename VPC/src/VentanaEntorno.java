@@ -55,7 +55,7 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 	private static final long serialVersionUID = 1L;
 	private Entorno backEnd;
 	private JPanel panelContenido, panelHistograma;
-	private JButton openImage, histograma, color, acumulativo , aceptar, aceptar1, aceptar2, aceptar3, aceptar4, imagenDiferencia, guardar;
+	private JButton openImage, histograma, color, acumulativo , aceptar, aceptar1, aceptar2, aceptar3, aceptar4, aceptar5, imagenDiferencia, guardar;
 	private JLabel imagen, datos, posRaton;
 	private JComboBox transformacionesLineales, transformacionesNoLineales, operacionesHistograma;
 	private JTextField valor, valor1;
@@ -67,7 +67,7 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 	protected SourceDataLine sourceDataLine;
 	protected boolean stopPlayback = false, isAcumulativo = false;
 	private XYBarRenderer renderer;
-	private JFrame h, b, c, tf, g, d;
+	private JFrame h, b, c, tf, g, d, e;
 	private String path;
 	/**
 	 * Metodo que observa las acciones realizadas en la interfaz grafica
@@ -162,12 +162,19 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 	        g.setVisible(true);
 		}else if(e.getSource()==operacionesHistograma) {
 			if((operacionesHistograma.getSelectedItem()).equals("Diferencia")) {
-				g = new JFrame("Diferencia");
-		        g.add(crearPanelDiferencia());
-		        g.pack();
-		        g.setLocationRelativeTo(null);
-		        g.setVisible(true);
-			}else	backEnd.ecualizar();
+				d = new JFrame("Diferencia");
+		        d.add(crearPanelDiferencia());
+		        d.pack();
+		        d.setLocationRelativeTo(null);
+		        d.setVisible(true);
+			}else if((operacionesHistograma.getSelectedItem()).equals("Especificar")) {
+				this.e = new JFrame("Especificar histograma");
+		        this.e.add(crearPanelEspecificarHistograma());
+		        this.e.pack();
+		        this.e.setLocationRelativeTo(null);
+		        this.e.setVisible(true);
+			}else backEnd.ecualizar();
+			
 		}else if(e.getSource() == imagenDiferencia) {
 			int returnVal = fc.showOpenDialog(panelContenido);
 
@@ -185,9 +192,46 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 				// TODO Auto-generated catch block
 				Aplicacion.logger.log(Level.WARNING, "No se pudo abrir la imagen", e1);
 			}
+		}else if(e.getSource() == aceptar5) {
+			try {
+				backEnd.specifyHisotgram(path);
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				Aplicacion.logger.log(Level.WARNING, "No se pudo abrir la imagen", e1);
+			}
 		}
 		imagen.setIcon(backEnd.getImagen());
 		pack();
+	}
+
+	private Component crearPanelEspecificarHistograma() {
+		JPanel panelContenido = new JPanel();
+		GroupLayout layout = new GroupLayout(panelContenido);
+		panelContenido.setLayout(layout);
+		layout.setAutoCreateGaps(true);
+		layout.setAutoCreateContainerGaps(true);
+		imagenDiferencia = new JButton("Imagen");
+		aceptar5 = new JButton("Aceptar");
+		
+		aceptar5.addActionListener(this);
+		imagenDiferencia.addActionListener(this);
+		
+		layout.setHorizontalGroup(
+				layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+				.addGroup(layout.createSequentialGroup()
+						.addComponent(imagenDiferencia)
+						.addComponent(aceptar5)
+						)
+				);
+		layout.setVerticalGroup(
+				layout.createSequentialGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+						.addComponent(imagenDiferencia)
+						.addComponent(aceptar5)
+						)
+				);
+		
+		return panelContenido;
 	}
 
 	private Component crearPanelDiferencia() {
@@ -448,7 +492,7 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 		transformacionesLineales = new JComboBox(listado);
 		String[] listado1 = {"Gamma"};
 		transformacionesNoLineales = new JComboBox(listado1);
-		String[] listado2 = {"Ecualizar" , "Diferencia"};
+		String[] listado2 = {"Ecualizar" , "Diferencia", "Especificar"};
 		operacionesHistograma = new JComboBox(listado2);
 		
 		openImage.addActionListener(this);

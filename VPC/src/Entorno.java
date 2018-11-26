@@ -307,4 +307,84 @@ public class Entorno  {
 		imagen = new ImageIcon(imagenBf);
 	}
 
+	public void specifyHisotgram(String path) throws IOException {
+		// TODO Auto-generated method stub
+		BufferedImage imagenObjetivo;
+		imagenObjetivo = ImageIO.read(new File(path));
+		long[][] histograma = new long[3][256];
+		long[][] histogramaObjetivo = new long[3][256];
+		final int w = imagenBf.getWidth();
+        final int h = imagenBf.getHeight();
+        Raster raster = imagenBf.getRaster();
+        Raster rasterObjetivo = imagenObjetivo.getRaster();
+        double[] r = new double[w * h +1];
+	    histograma[0] = ArrayMaths.Histograma(raster.getSamples(0, 0, w, h, 0, r));
+	    histograma[1] = ArrayMaths.Histograma(raster.getSamples(0, 0, w, h, 1, r));
+	    histograma[2] = ArrayMaths.Histograma(raster.getSamples(0, 0, w, h, 2, r));
+	    histogramaObjetivo[0] = ArrayMaths.Histograma(rasterObjetivo.getSamples(0, 0, w, h, 0, r));
+	    histogramaObjetivo[1] = ArrayMaths.Histograma(rasterObjetivo.getSamples(0, 0, w, h, 1, r));
+	    histogramaObjetivo[2] = ArrayMaths.Histograma(rasterObjetivo.getSamples(0, 0, w, h, 2, r));
+	    for(int i = 0; i < 3; i++)
+	    	for(int j = 0; j < histograma[i].length; j++) {
+	    		System.out.println(i + " " + j);
+	    		long diff = 0;
+	    		if(j < histogramaObjetivo[i].length) diff = histograma[i][j] - histogramaObjetivo[i][j];
+	    		int x = 0, y = 0;
+	    		while((diff != 0) && (y < h)) {
+	    			Color rgb = new Color(imagenBf.getRGB(x, y));
+	    			int aux = 0;
+	    			switch (i) {
+	    			case 1:	
+	    				aux = rgb.getRed();
+	    				if((diff < 0) && (aux > j)) {
+		    				rgb = new Color(j , rgb.getGreen(), rgb.getBlue() );
+		    				diff++;
+		    				histograma[i][aux]--;
+		    				imagenBf.setRGB(x, y, rgb.getRGB());
+		    			}else if((diff > 0) && (aux == j)) {
+		    				int random = (int)(Math.random() * (histograma[i].length - j)) + j;
+		    				rgb = new Color(random , rgb.getGreen(), rgb.getBlue() );
+		    				diff--;
+		    				histograma[i][random]++;
+		    				imagenBf.setRGB(x, y, rgb.getRGB());
+		    			}
+	    			case 2:
+	    				aux = rgb.getGreen();
+	    				if((diff < 0) && (aux > j)) {
+		    				rgb = new Color(rgb.getRed() , j, rgb.getBlue() );
+		    				diff++;
+		    				histograma[i][aux]--;
+		    				imagenBf.setRGB(x, y, rgb.getRGB());
+		    			}else if((diff > 0) && (aux == j)) {
+		    				int random = (int)(Math.random() * (histograma[i].length - j)) + j;
+		    				rgb = new Color(rgb.getRed() , random, rgb.getBlue() );
+		    				diff--;
+		    				histograma[i][random]++;
+		    				imagenBf.setRGB(x, y, rgb.getRGB());
+		    			}
+	    			case 3:
+	    				aux = rgb.getBlue();
+	    				if((diff < 0) && (aux > j)) {
+		    				rgb = new Color(rgb.getRed() , rgb.getGreen(), j );
+		    				diff++;
+		    				histograma[i][aux]--;
+		    				imagenBf.setRGB(x, y, rgb.getRGB());
+		    			}else if((diff > 0) && (aux == j)) {
+		    				int random = (int)(Math.random() * (histograma[i].length - j)) + j;
+		    				rgb = new Color(rgb.getRed() , rgb.getGreen(), random );
+		    				diff--;
+		    				histograma[i][random]++;
+		    				imagenBf.setRGB(x, y, rgb.getRGB());
+		    			}
+	    			}
+	    			x++;
+	    			if((x == w) && (y < h) ) {
+	    				x = 0;
+	    				y++;
+	    			}
+	    		}
+	    	}
+	    imagen = new ImageIcon(imagenBf);
+	}
+
 }
