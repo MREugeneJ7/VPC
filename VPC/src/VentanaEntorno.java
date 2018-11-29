@@ -129,7 +129,8 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 		        c.pack();
 		        c.setLocationRelativeTo(null);
 		        c.setVisible(true);
-			}else {
+			}else if((transformacionesLineales.getSelectedItem()).equals("Escala de grises")) backEnd.grayScale();
+			else {
 				tf = new JFrame("Transformacion lineal");
 		        tf.add(crearPaneTL());
 		        tf.pack();
@@ -488,7 +489,7 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 		datos = new JLabel("");
 		posRaton = new JLabel("");
 		imagen = new JLabel();
-		String[] listado = {"brillo","contraste", "Transformacion Lineal"};
+		String[] listado = {"brillo","contraste", "Transformacion Lineal", "Escala de grises"};
 		transformacionesLineales = new JComboBox(listado);
 		String[] listado1 = {"Gamma"};
 		transformacionesNoLineales = new JComboBox(listado1);

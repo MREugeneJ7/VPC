@@ -387,4 +387,20 @@ public class Entorno  {
 	    imagen = new ImageIcon(imagenBf);
 	}
 
+	public void grayScale() {
+		// TODO Auto-generated method stub
+		for(int i = 0; i < imagenBf.getWidth();i++) {
+			for(int j =0; j < imagenBf.getHeight();j++) {
+				Color color = new Color(imagenBf.getRGB(i, j));
+				int red = color.getRed();
+				int blue = color.getBlue();
+				int green = color.getGreen();
+				int gray = (red+blue+green)/3;
+				color = new Color(gray, gray, gray);
+				imagenBf.setRGB(i, j, color.getRGB());
+			}
+		}
+		imagen = new ImageIcon(imagenBf);
+	}
+
 }
