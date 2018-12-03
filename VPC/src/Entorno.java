@@ -1,6 +1,9 @@
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Image;
 import java.awt.Paint;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -49,6 +52,7 @@ public class Entorno  {
 		imagenBf = ImageIO.read(new File(direccion));
 		bits = imagenBf.getColorModel().getPixelSize();
 		seleccion = new Linea(imagenBf.getHeight()*imagenBf.getWidth());
+		updateIcon();
 	}
 
 	public Entorno() {
@@ -118,7 +122,7 @@ public class Entorno  {
 				imagenBf.setRGB(i, j, color);
 			}
 		}
-		imagen = new ImageIcon(imagenBf);
+		updateIcon();
 	}
 
 
@@ -145,7 +149,7 @@ public class Entorno  {
 				imagenBf.setRGB(i, j, color.getRGB());
 			}
 		}
-		imagen = new ImageIcon(imagenBf);
+		updateIcon();
 	}
 
 	public BufferedImage getImagenBf() {
@@ -180,7 +184,7 @@ public class Entorno  {
 				imagenBf.setRGB(i, j, color.getRGB());
 			}
 		}
-		imagen = new ImageIcon(imagenBf);
+		updateIcon();
 	}
 
 	public void gamma(double gamma) {
@@ -205,7 +209,7 @@ public class Entorno  {
 				imagenBf.setRGB(i, j, color.getRGB());
 			}
 		}
-		imagen = new ImageIcon(imagenBf);
+		updateIcon();
 	}
 
 	public void ecualizar() {
@@ -277,7 +281,7 @@ public class Entorno  {
 	    			}
 	    		}
 	    	}
-	    imagen = new ImageIcon(imagenBf);
+	    updateIcon();
 	}
 
 	public void calcularDiferencia(String path, int umbral) throws IOException {
@@ -304,7 +308,7 @@ public class Entorno  {
 				imagenBf.setRGB(i, j, color.getRGB());
 			}
 		}
-		imagen = new ImageIcon(imagenBf);
+		updateIcon();
 	}
 
 	public void specifyHisotgram(String path) throws IOException {
@@ -384,7 +388,7 @@ public class Entorno  {
 	    			}
 	    		}
 	    	}
-	    imagen = new ImageIcon(imagenBf);
+	    updateIcon();
 	}
 
 	public void grayScale() {
@@ -400,7 +404,41 @@ public class Entorno  {
 				imagenBf.setRGB(i, j, color.getRGB());
 			}
 		}
+		updateIcon();
+	}
+	
+	private void updateIcon() {
+		double factor = 0;
+		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+		int height = (int)screenSize.getHeight() - 200;
+		int width = (int)screenSize.getWidth() - 200;
+		if(imagenBf.getHeight() > height) {
+			factor = (double)height / imagenBf.getHeight();
+			width = (int)( imagenBf.getWidth() * factor);
+		}
+		if(imagenBf.getWidth() > width) {
+			factor = (double)width / imagenBf.getWidth();
+			height = (int)( imagenBf.getHeight() * factor);
+		}
+		
 		imagen = new ImageIcon(imagenBf);
+		Image resize = imagen.getImage().getScaledInstance(width, height, java.awt.Image.SCALE_SMOOTH);
+		imagen = new ImageIcon(resize);
+	}
+
+	public void negative() {
+		// TODO Auto-generated method stub
+		for(int i = 0; i < imagenBf.getWidth();i++) {
+			for(int j =0; j < imagenBf.getHeight();j++) {
+				Color color = new Color(imagenBf.getRGB(i, j));
+				int red = color.getRed();
+				int blue = color.getBlue();
+				int green = color.getGreen();
+				color = new Color(255- red, 255 - green, 255 - blue);
+				imagenBf.setRGB(i, j, color.getRGB());
+			}
+		}
+		updateIcon();
 	}
 
 }
