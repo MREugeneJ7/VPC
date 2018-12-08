@@ -441,4 +441,30 @@ public class Entorno  {
 		updateIcon();
 	}
 
+	public void daltonismo(int selector) {
+		for(int i = 0; i < imagenBf.getWidth();i++) {
+			for(int j =0; j < imagenBf.getHeight();j++) {
+				Color color = new Color(imagenBf.getRGB(i, j));
+				int red = color.getRed();
+				int blue = color.getBlue();
+				int green = color.getGreen();
+				switch(selector) {
+					case 1:
+						red = 0;
+						break;
+					case 2:
+						green = 0;
+						break;
+					case 3:
+						blue = 0;
+						break;
+				}
+				color = new Color(red, green, blue);
+				imagenBf.setRGB(i, j, color.getRGB());
+			}
+		}
+		updateIcon();
+		
+	}
+
 }

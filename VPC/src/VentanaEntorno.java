@@ -50,7 +50,7 @@ import java.util.logging.Logger;
  * @version 1.1.c 10/10/2017
  */
 
-public class VentanaEntorno extends JFrame implements ActionListener, TableModelListener, ChangeListener, MouseListener, MouseMotionListener {
+public class VentanaEntorno extends JFrame implements ActionListener, TableModelListener, ChangeListener, MouseListener, MouseMotionListener, ItemListener {
 
 	private static final long serialVersionUID = 1L;
 	private Entorno backEnd;
@@ -58,6 +58,7 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 	private JButton openImage, histograma, color, acumulativo , aceptar, aceptar1, aceptar2, aceptar3, aceptar4, aceptar5, imagenDiferencia, guardar;
 	private JLabel imagen, datos, posRaton;
 	private JComboBox transformacionesLineales, transformacionesNoLineales, operacionesHistograma;
+	private JCheckBox red, green, blue;
 	private JTextField valor, valor1;
 	private final JFileChooser fc = new JFileChooser();
 	private int j = 0;
@@ -67,7 +68,7 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 	protected SourceDataLine sourceDataLine;
 	protected boolean stopPlayback = false, isAcumulativo = false;
 	private XYBarRenderer renderer;
-	private JFrame h, b, c, tf, g, d, e;
+	private JFrame h, b, c, tf, g, d, e, dt;
 	private String path;
 	/**
 	 * Metodo que observa las acciones realizadas en la interfaz grafica
@@ -131,6 +132,13 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 		        c.setVisible(true);
 			}else if((transformacionesLineales.getSelectedItem()).equals("Escala de grises")) backEnd.grayScale();
 			else if((transformacionesLineales.getSelectedItem()).equals("Negativo")) backEnd.negative();
+			else if((transformacionesLineales.getSelectedItem()).equals("Daltonismo")) {
+				dt = new JFrame("Daltonismo");
+		        dt.add(crearPaneD());
+		        dt.pack();
+		        dt.setLocationRelativeTo(null);
+		        dt.setVisible(true);
+			}
 			else {
 				tf = new JFrame("Transformacion lineal");
 		        tf.add(crearPaneTL());
@@ -204,6 +212,47 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 		}
 		imagen.setIcon(backEnd.getImagen());
 		pack();
+	}
+
+	private Component crearPaneD() {
+		// TODO Auto-generated method stub
+		JPanel panelContenido = new JPanel();
+		GroupLayout layout = new GroupLayout(panelContenido);
+		panelContenido.setLayout(layout);
+		layout.setAutoCreateGaps(true);
+		layout.setAutoCreateContainerGaps(true);
+		red = new JCheckBox("red");
+		red.setMnemonic(KeyEvent.VK_R); 
+	    red.setSelected(true);
+		green = new JCheckBox("green");
+		green.setMnemonic(KeyEvent.VK_G); 
+	    green.setSelected(true);
+		blue = new JCheckBox("blue");
+		blue.setMnemonic(KeyEvent.VK_B); 
+	    blue.setSelected(true);
+		
+		red.addItemListener(this);
+		green.addItemListener(this);
+		blue.addItemListener(this);
+		
+		layout.setHorizontalGroup(
+				layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+				.addGroup(layout.createSequentialGroup()
+						.addComponent(red)
+						.addComponent(green)
+						.addComponent(blue)
+						)
+				);
+		layout.setVerticalGroup(
+				layout.createSequentialGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+						.addComponent(red)
+						.addComponent(green)
+						.addComponent(blue)
+						)
+				);
+		
+		return panelContenido;
 	}
 
 	private Component crearPanelEspecificarHistograma() {
@@ -490,7 +539,7 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 		datos = new JLabel("");
 		posRaton = new JLabel("");
 		imagen = new JLabel();
-		String[] listado = {"brillo","contraste", "Transformacion Lineal", "Escala de grises", "Negativo"};
+		String[] listado = {"brillo","contraste", "Transformacion Lineal", "Escala de grises", "Negativo", "Daltonismo"};
 		transformacionesLineales = new JComboBox(listado);
 		String[] listado1 = {"Gamma"};
 		transformacionesNoLineales = new JComboBox(listado1);
@@ -624,6 +673,22 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 		// TODO Auto-generated method stub
 		//backEnd.guardarSeleccion(e);
 		
+	}
+
+	@Override
+	public void itemStateChanged(ItemEvent e) {
+		// TODO Auto-generated method stub
+		Object source = e.getItemSelectable();
+
+	    if (source == red) {
+	        backEnd.daltonismo(1);
+	    } else if (source == green) {
+	    	backEnd.daltonismo(2);
+	    } else if (source == blue) {
+	    	backEnd.daltonismo(3);
+	    }
+	    imagen.setIcon(backEnd.getImagen());
+		pack();
 	}
 
 
