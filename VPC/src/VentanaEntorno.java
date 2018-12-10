@@ -84,7 +84,7 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 				try {
 					path = file.getAbsolutePath();
 					backEnd = new Entorno(file.getAbsolutePath());
-					datos.setText("Tipo:" + backEnd.getType() + " Bits:" + backEnd.getBits()/3 + " " +  
+					datos.setText("Tipo:" + backEnd.getType() + " Bits:" + backEnd.getBits() + " " +  
 							backEnd.getImagen().getIconWidth() + "x" + backEnd.getImagen().getIconHeight());
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block
@@ -426,23 +426,29 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
         final int h = backEnd.getImagenBf().getHeight();
         double[] r = new double[w * h +1];
         if(!isAcumulativo) {
-	        if(j==1) { 
-	        r = raster.getSamples(0, 0, w, h, 0, r);
-	        auxDataset.addSeries("Red", r, 256);
-	        r = raster.getSamples(0, 0, w, h, 1, r);
-	        auxDataset.addSeries("Green", r, 256);
-	        r = raster.getSamples(0, 0, w, h, 2, r);
-	        auxDataset.addSeries("Blue", r, 256);
-	        backEnd.setDataset(auxDataset);
-	        }
-	        //Histograma a color
-	        if(j==0){
-	        	r = ArrayMaths.multiply(raster.getSamples(0, 0, w, h, 0, r),0.33);
-	        	r = ArrayMaths.Add(r , ArrayMaths.multiply(raster.getSamples(0, 0, w, h, 1, r),0.33));
-	        	r = ArrayMaths.Add(r , ArrayMaths.multiply(raster.getSamples(0, 0, w, h, 2, r),0.33));
-	        	auxDataset.addSeries("Luminosidad", r, 256);
-	        	backEnd.setDataset(auxDataset);
-	        }
+        	if(backEnd.getBits() == 8) {
+        		r = raster.getSamples(0, 0, w, h, 0, r);
+        		auxDataset.addSeries("Luminosidad", r, 256);
+        		backEnd.setDataset(auxDataset);
+        	}
+        	else {  if(j==1) { 
+		        r = raster.getSamples(0, 0, w, h, 0, r);
+		        auxDataset.addSeries("Red", r, 256);
+		        r = raster.getSamples(0, 0, w, h, 1, r);
+		        auxDataset.addSeries("Green", r, 256);
+		        r = raster.getSamples(0, 0, w, h, 2, r);
+		        auxDataset.addSeries("Blue", r, 256);
+		        backEnd.setDataset(auxDataset);
+		        }
+		        //Histograma a color
+		        if(j==0){
+		        	r = ArrayMaths.multiply(raster.getSamples(0, 0, w, h, 0, r),0.33);
+		        	r = ArrayMaths.Add(r , ArrayMaths.multiply(raster.getSamples(0, 0, w, h, 1, r),0.33));
+		        	r = ArrayMaths.Add(r , ArrayMaths.multiply(raster.getSamples(0, 0, w, h, 2, r),0.33));
+		        	auxDataset.addSeries("Luminosidad", r, 256);
+		        	backEnd.setDataset(auxDataset);
+		        }
+        	}
         } else {
         	if(j==1) { 
     	        r = ArrayMaths.toDouble(ArrayMaths.HistogramaAcumulativo(raster.getSamples(0, 0, w, h, 0, r)));
@@ -479,7 +485,7 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
                 //Colores color
             };
             Paint[] black = {new Color(0xff000000, true)};
-            if(j==0) paintArray = black; 
+            if(j==0 || backEnd.getBits() == 8) paintArray = black; 
             
             plot.setDrawingSupplier(new DefaultDrawingSupplier(
                 paintArray,
