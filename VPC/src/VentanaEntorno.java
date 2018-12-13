@@ -5,6 +5,8 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.SourceDataLine;
 import javax.swing.*;
+import javax.swing.GroupLayout.ParallelGroup;
+import javax.swing.GroupLayout.SequentialGroup;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.TableModelEvent;
@@ -55,11 +57,11 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 	private static final long serialVersionUID = 1L;
 	private Entorno backEnd;
 	private JPanel panelContenido, panelHistograma;
-	private JButton openImage, histograma, color, acumulativo , aceptar, aceptar1, aceptar2, aceptar3, aceptar4, aceptar5, imagenDiferencia, guardar;
+	private JButton openImage, histograma, color, acumulativo , aceptar, aceptar1, aceptar2, aceptar3, aceptar4, aceptar5, aceptar6, imagenDiferencia, guardar;
 	private JLabel imagen, datos, posRaton;
 	private JComboBox transformacionesLineales, transformacionesNoLineales, operacionesHistograma;
 	private JCheckBox red, green, blue;
-	private JTextField valor, valor1;
+	private JTextField valor, valor1, alfa[], beta[], min[], max[];
 	private final JFileChooser fc = new JFileChooser();
 	private int j = 0;
 	ButtonGroup metodos;
@@ -68,7 +70,7 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 	protected SourceDataLine sourceDataLine;
 	protected boolean stopPlayback = false, isAcumulativo = false;
 	private XYBarRenderer renderer;
-	private JFrame h, b, c, tf, g, d, e, dt;
+	private JFrame h, b, c, tf, g, d, e, dt, tff;
 	private String path;
 	/**
 	 * Metodo que observa las acciones realizadas en la interfaz grafica
@@ -141,7 +143,7 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 			}
 			else {
 				tf = new JFrame("Transformacion lineal");
-		        tf.add(crearPaneTL());
+		        tf.add(creadorPaneTL());
 		        tf.pack();
 		        tf.setLocationRelativeTo(null);
 		        tf.setVisible(true);
@@ -153,10 +155,17 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 			float contraste = Float.parseFloat(valor.getText());
 			backEnd.cambiarContraste(contraste);
 		} else if (e.getSource() == aceptar2){
-			int brillo = Integer.parseInt(valor.getText());
-			float contraste = Float.parseFloat(valor1.getText());
-			backEnd.cambiarBrillo(brillo);
-			backEnd.cambiarContraste(contraste);
+			int brillo[] = new int[alfa.length];
+			float contraste[] = new float[alfa.length];
+			int min[] = new int[alfa.length];
+			int max[] = new int[alfa.length];
+			for(int i = 0; i < alfa.length; i++){
+				brillo[i] = Integer.parseInt(alfa[i].getText());
+				contraste[i] = Float.parseFloat(beta[i].getText());
+				min[i] = Integer.parseInt(this.min[i].getText());
+				max[i] = Integer.parseInt(this.max[i].getText());
+			}
+			backEnd.tranLinPT(brillo,contraste,min,max);
 		}else if(e.getSource()==aceptar3){
 			double gamma = Double.parseDouble(valor.getText());
 			backEnd.gamma(gamma);
@@ -209,9 +218,54 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 				// TODO Auto-generated catch block
 				Aplicacion.logger.log(Level.WARNING, "No se pudo abrir la imagen", e1);
 			}
-		}
+		}else if(e.getSource() == aceptar6) {
+				int cantidad = Integer.parseInt(valor.getText());
+				tff = new JFrame("Transformaciones lineas");
+		        tff.add(crearPaneTL(cantidad));
+		        tff.pack();
+		        tff.setLocationRelativeTo(null);
+		        tff.setVisible(true);
+				
+			}
 		imagen.setIcon(backEnd.getImagen());
 		pack();
+	}
+
+	private Component creadorPaneTL() {
+		// TODO Auto-generated method stub
+		JPanel panelContenido = new JPanel();
+		GroupLayout layout = new GroupLayout(panelContenido);
+		panelContenido.setLayout(layout);
+		layout.setAutoCreateGaps(true);
+		layout.setAutoCreateContainerGaps(true);
+		JLabel pregunta = new JLabel("cuantos tramos quiere hacer");
+		valor = new JTextField(10);
+		aceptar6 = new JButton("Aceptar");
+		
+		aceptar6.addActionListener(this);
+		
+		layout.setHorizontalGroup(
+				layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+				.addGroup(layout.createSequentialGroup()
+						.addComponent(pregunta)
+						)
+				.addGroup(layout.createSequentialGroup()
+						.addComponent(valor)
+						.addComponent(aceptar6)
+						)
+				);
+		layout.setVerticalGroup(
+				layout.createSequentialGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+						.addComponent(pregunta)
+						)
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+						.addComponent(valor)
+						.addComponent(aceptar6)
+						)
+				);
+		
+		return panelContenido;
 	}
 
 	private Component crearPaneD() {
@@ -347,40 +401,64 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 		return panelContenido;
 	}
 
-	private Component crearPaneTL() {
+	private Component crearPaneTL(int cantidad) {
 		JPanel panelContenido = new JPanel();
 		GroupLayout layout = new GroupLayout(panelContenido);
 		panelContenido.setLayout(layout);
 		layout.setAutoCreateGaps(true);
 		layout.setAutoCreateContainerGaps(true);
-		valor = new JTextField(10);
-		valor1 = new JTextField(10);
+		alfa = new JTextField[cantidad];
+		beta = new JTextField[cantidad];
+		min = new JTextField[cantidad];
+		max = new JTextField[cantidad];
+		for (int i = 0; i < cantidad; i++){
+			alfa[i] = new JTextField(10);
+			beta[i] = new JTextField(10);
+			min[i] = new JTextField(10);
+			max[i] = new JTextField(10);
+		}
+		
 		JLabel v1 = new JLabel("V1:");
 		JLabel v0 = new JLabel(" + V0* ");
 		aceptar2 = new JButton("Aceptar");
 		
 		aceptar2.addActionListener(this);
 		
+		ParallelGroup grupoHorizontal = layout.createParallelGroup(GroupLayout.Alignment.LEADING);
+		SequentialGroup grupoSecuencial = layout.createSequentialGroup();
+		
+		for (int i = 0; i < cantidad; i++){
+			grupoHorizontal.addGroup(layout.createSequentialGroup()
+							.addComponent(v1)
+							.addComponent(alfa[i])
+							.addComponent(v0)
+							.addComponent(beta[i])
+							.addComponent(min[i])
+							.addComponent(max[i])
+					);
+		}
+		for (int i = 0; i < cantidad; i++){
+			grupoSecuencial.addGroup((layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+				.addComponent(v1)
+				.addComponent(alfa[i])
+				.addComponent(v0)
+				.addComponent(beta[i])
+				.addComponent(min[i])
+				.addComponent(max[i])
+				)
+			);
+		}
+		
 		layout.setHorizontalGroup(
 				layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-				.addGroup(layout.createSequentialGroup()
-						.addGroup(layout.createSequentialGroup()
-								.addComponent(v1)
-								.addComponent(valor)
-								.addComponent(v0)
-								.addComponent(valor1)
-						)
-						.addComponent(aceptar2)
-						)
+					.addGroup(grupoHorizontal)
+					.addGroup(layout.createSequentialGroup()	
+							.addComponent(aceptar2)
+					)
 				);
 		layout.setVerticalGroup(
 				layout.createSequentialGroup()
-				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-						.addComponent(v1)
-						.addComponent(valor)
-						.addComponent(v0)
-						.addComponent(valor1)
-					)
+				.addGroup(grupoSecuencial)
 				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
 						.addComponent(aceptar2)
 					)

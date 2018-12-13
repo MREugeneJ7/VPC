@@ -336,7 +336,7 @@ public class Entorno  {
 		BufferedImage imagenObjetivo;
 		imagenObjetivo = ImageIO.read(new File(path));
 		if(imagenObjetivo.getColorModel().getPixelSize() != bits) {
-			System.out.println("no se puede especificar el historgrama de dos imagenes con distinto tamaño de pixel");
+			System.out.println("no se puede especificar el historgrama de dos imagenes con distinto tamaï¿½o de pixel");
 			return;
 		}
 		long[][] histograma = new long[3][256];
@@ -514,6 +514,63 @@ public class Entorno  {
 		}
 		updateIcon();
 		
+	}
+
+	public void tranLinPT(int[] brillo, float[] contraste, int[] min, int[] max) {
+		// TODO Auto-generated method stub
+		for(int i = 0; i < brillo.length; i++){
+			cambiarBrilloCondicionado(brillo[i], min[i], max[i]);
+			cambiarContrasteCondicionado(contraste[i], min[i], max[i]);
+		}
+	}
+
+	private void cambiarContrasteCondicionado(float contraste, int j, int k) {
+		// TODO Auto-generated method stub
+		for(int i = 0; i < imagenBf.getWidth();i++) {
+			for(int h =0; h < imagenBf.getHeight();h++) {
+				Color color = new Color(imagenBf.getRGB(i, h));
+				int red = color.getRed();
+				int blue = color.getBlue();
+				int green = color.getGreen();
+				if(red >= j && red <= k) red *= contraste;
+				if(blue >= j && blue <= k) blue *= contraste;
+				if(green >= j && green <= k) green *= contraste;
+				if(red < 0) red = 0;
+				if(red > 255) red = 255;
+				if(blue < 0) blue = 0;
+				if(blue > 255) blue = 255;
+				if(green < 0) green = 0;
+				if(green > 255) green = 255;
+				color = new Color(red, green, blue);
+				imagenBf.setRGB(i, h, color.getRGB());
+			}
+		}
+		updateIcon();
+		
+	}
+
+	private void cambiarBrilloCondicionado(int brillo, int j, int k) {
+		// TODO Auto-generated method stub
+		for(int i = 0; i < imagenBf.getWidth();i++) {
+			for(int h =0; h < imagenBf.getHeight();h++) {
+				Color color = new Color(imagenBf.getRGB(i, h));
+				int red = color.getRed();
+				int blue = color.getBlue();
+				int green = color.getGreen();
+				if(red >= j && red <= k) red += brillo;
+				if(blue >= j && blue <= k) blue += brillo;
+				if(green >= j && green <= k) green += brillo;
+				if(red < 0) red = 0;
+				if(red > 255) red = 255;
+				if(blue < 0) blue = 0;
+				if(blue > 255) blue = 255;
+				if(green < 0) green = 0;
+				if(green > 255) green = 255;
+				color = new Color(red, green, blue);
+				imagenBf.setRGB(i, h, color.getRGB());
+			}
+		}
+		updateIcon();
 	}
 
 }
