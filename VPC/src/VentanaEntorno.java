@@ -1,9 +1,12 @@
+import javax.imageio.ImageIO;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.SourceDataLine;
 import javax.swing.*;
+import javax.swing.GroupLayout.ParallelGroup;
+import javax.swing.GroupLayout.SequentialGroup;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.TableModelEvent;
@@ -12,16 +15,36 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.DefaultDrawingSupplier;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.StandardXYBarPainter;
+import org.jfree.chart.renderer.xy.XYBarRenderer;
+import org.jfree.data.category.CategoryDataset;
+import org.jfree.data.category.DefaultCategoryDataset;
+import org.jfree.data.statistics.HistogramDataset;
+import org.jfree.data.xy.IntervalXYDataset;
+
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Image;
+import java.awt.Paint;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.event.*;
+import java.awt.image.BufferedImage;
+import java.awt.image.Raster;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * IA Pract1
@@ -32,22 +55,26 @@ import java.io.IOException;
  * @version 1.1.c 10/10/2017
  */
 
-public class VentanaEntorno extends JFrame implements ActionListener, TableModelListener, ChangeListener, MouseListener, MouseMotionListener {
+public class VentanaEntorno extends JFrame implements ActionListener, TableModelListener, ChangeListener, MouseListener, MouseMotionListener, ItemListener {
 
 	private static final long serialVersionUID = 1L;
 	private Entorno backEnd;
-	private JPanel panelContenido;
-	private JButton openImage, histograma, color, aceptar;
+	private JPanel panelContenido, panelHistograma;
+	private JButton openImage, histograma, color, acumulativo , aceptar, aceptar1, aceptar2, aceptar3, aceptar4, aceptar5, aceptar6, imagenDiferencia, guardar;
 	private JLabel imagen, datos, posRaton;
-	private JComboBox transformacionesLineales;
-	private JTextField valor;
+	private JComboBox transformacionesLineales, transformacionesNoLineales, operacionesHistograma;
+	private JCheckBox red, green, blue;
+	private JTextField valor, valor1, alfa[], beta[], min[], max[];
 	private final JFileChooser fc = new JFileChooser();
 	private int j = 0;
 	ButtonGroup metodos;
 	protected AudioFormat audioFormat;
 	protected AudioInputStream audioInputStream;
 	protected SourceDataLine sourceDataLine;
-	protected boolean stopPlayback = false;
+	protected boolean stopPlayback = false, isAcumulativo = false;
+	private XYBarRenderer renderer;
+	private JFrame h, b, c, tf, g, d, e, dt, tff;
+	private String path;
 	/**
 	 * Metodo que observa las acciones realizadas en la interfaz grafica
 	 * 
@@ -60,40 +87,518 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
 				File file = fc.getSelectedFile();
 				try {
+					path = file.getAbsolutePath();
 					backEnd = new Entorno(file.getAbsolutePath());
-					datos.setText("Tipo:" + backEnd.getType() + " Bits:" + backEnd.getBits()/3 + " " +  
+					datos.setText("Tipo:" + backEnd.getType() + " Bits:" + backEnd.getBits() + " " +  
 							backEnd.getImagen().getIconWidth() + "x" + backEnd.getImagen().getIconHeight());
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block
-					e1.printStackTrace();
+					Aplicacion.logger.log(Level.WARNING, "No se pudo abrir la imagen", e1);
 				}
 			} else {
 				System.out.println("Open command cancelled by user.");
 			}
-		} else if (e.getSource() == histograma) {
-			JFrame f = new JFrame("Histograma");
-	        f.add(backEnd.crearPanelHistograma(j));
-	        f.pack();
-	        f.setLocationRelativeTo(null);
-	        f.setVisible(true);
+		} else if(e.getSource() == guardar){
+			int returnVal = fc.showSaveDialog(panelContenido);
+			if (returnVal == JFileChooser.APPROVE_OPTION) {
+				File file = fc.getSelectedFile();
+				try {
+					ImageIO.write(backEnd.getImagenBf(), backEnd.getType(), file);
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					Aplicacion.logger.log(Level.WARNING, "No se pudo abrir la imagen", e1);
+				}
+			} else {
+				System.out.println("Open command cancelled by user.");
+			}
+		}
+		else if (e.getSource() == histograma) {
+			h = new JFrame("Histograma");
+			panelHistograma = crearPanelHistograma();
+	        h.add(panelHistograma);
+	        h.pack();
+	        h.setLocationRelativeTo(null);
+	        h.setVisible(true);
 		} else if(e.getSource() == color) {
 			if(j==0) j = 1;
 			else j = 0;
 		} else if(e.getSource() == transformacionesLineales) {
 			if((transformacionesLineales.getSelectedItem()).equals("brillo")){
-				JFrame f = new JFrame("Brillo");
-		        f.add(crearPaneBrillo());
-		        f.pack();
-		        f.setLocationRelativeTo(null);
-		        f.setVisible(true);
+				b = new JFrame("Brillo");
+		        b.add(crearPaneBrillo());
+		        b.pack();
+		        b.setLocationRelativeTo(null);
+		        b.setVisible(true);
+			} else if((transformacionesLineales.getSelectedItem()).equals("contraste")) {
+				c = new JFrame("Contraste");
+		        c.add(crearPaneContraste());
+		        c.pack();
+		        c.setLocationRelativeTo(null);
+		        c.setVisible(true);
+			}else if((transformacionesLineales.getSelectedItem()).equals("Escala de grises")) backEnd.grayScale();
+			else if((transformacionesLineales.getSelectedItem()).equals("Negativo")) backEnd.negative();
+			else if((transformacionesLineales.getSelectedItem()).equals("Daltonismo")) {
+				dt = new JFrame("Daltonismo");
+		        dt.add(crearPaneD());
+		        dt.pack();
+		        dt.setLocationRelativeTo(null);
+		        dt.setVisible(true);
+			}
+			else {
+				tf = new JFrame("Transformacion lineal");
+		        tf.add(creadorPaneTL());
+		        tf.pack();
+		        tf.setLocationRelativeTo(null);
+		        tf.setVisible(true);
 			}
 		} else if (e.getSource()==aceptar){
 			int brillo = Integer.parseInt(valor.getText());
 			backEnd.cambiarBrillo(brillo);
+		} else if (e.getSource()==aceptar1) {
+			float contraste = Float.parseFloat(valor.getText());
+			backEnd.cambiarContraste(contraste);
+		} else if (e.getSource() == aceptar2){
+			int brillo[] = new int[alfa.length];
+			float contraste[] = new float[alfa.length];
+			int min[] = new int[alfa.length];
+			int max[] = new int[alfa.length];
+			for(int i = 0; i < alfa.length; i++){
+				brillo[i] = Integer.parseInt(alfa[i].getText());
+				contraste[i] = Float.parseFloat(beta[i].getText());
+				min[i] = Integer.parseInt(this.min[i].getText());
+				max[i] = Integer.parseInt(this.max[i].getText());
+			}
+			backEnd.tranLinPT(brillo,contraste,min,max);
+		}else if(e.getSource()==aceptar3){
+			double gamma = Double.parseDouble(valor.getText());
+			backEnd.gamma(gamma);
 		}
+		else if (e.getSource()==acumulativo) {
+			if(!isAcumulativo) isAcumulativo = true;
+			else isAcumulativo = false;
+		}else if(e.getSource()==transformacionesNoLineales){
+			g = new JFrame("Gamma");
+	        g.add(crearPanelGamma());
+	        g.pack();
+	        g.setLocationRelativeTo(null);
+	        g.setVisible(true);
+		}else if(e.getSource()==operacionesHistograma) {
+			if((operacionesHistograma.getSelectedItem()).equals("Diferencia")) {
+				d = new JFrame("Diferencia");
+		        d.add(crearPanelDiferencia());
+		        d.pack();
+		        d.setLocationRelativeTo(null);
+		        d.setVisible(true);
+			}else if((operacionesHistograma.getSelectedItem()).equals("Especificar")) {
+				this.e = new JFrame("Especificar histograma");
+		        this.e.add(crearPanelEspecificarHistograma());
+		        this.e.pack();
+		        this.e.setLocationRelativeTo(null);
+		        this.e.setVisible(true);
+			}else backEnd.ecualizar();
+			
+		}else if(e.getSource() == imagenDiferencia) {
+			int returnVal = fc.showOpenDialog(panelContenido);
+
+			if (returnVal == JFileChooser.APPROVE_OPTION) {
+				File file = fc.getSelectedFile();
+					path = file.getAbsolutePath();
+			} else {
+				System.out.println("Open command cancelled by user.");
+			}
+		}else if(e.getSource() == aceptar4) {
+			int umbral = Integer.parseInt(valor.getText());
+			try {
+				backEnd.calcularDiferencia(path , umbral);
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				Aplicacion.logger.log(Level.WARNING, "No se pudo abrir la imagen", e1);
+			}
+		}else if(e.getSource() == aceptar5) {
+			try {
+				backEnd.specifyHisotgram(path);
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				Aplicacion.logger.log(Level.WARNING, "No se pudo abrir la imagen", e1);
+			}
+		}else if(e.getSource() == aceptar6) {
+				int cantidad = Integer.parseInt(valor.getText());
+				tff = new JFrame("Transformaciones lineas");
+		        tff.add(crearPaneTL(cantidad));
+		        tff.pack();
+		        tff.setLocationRelativeTo(null);
+		        tff.setVisible(true);
+				
+			}
 		imagen.setIcon(backEnd.getImagen());
 		pack();
 	}
+
+	private Component creadorPaneTL() {
+		// TODO Auto-generated method stub
+		JPanel panelContenido = new JPanel();
+		GroupLayout layout = new GroupLayout(panelContenido);
+		panelContenido.setLayout(layout);
+		layout.setAutoCreateGaps(true);
+		layout.setAutoCreateContainerGaps(true);
+		JLabel pregunta = new JLabel("cuantos tramos quiere hacer");
+		valor = new JTextField(10);
+		aceptar6 = new JButton("Aceptar");
+		
+		aceptar6.addActionListener(this);
+		
+		layout.setHorizontalGroup(
+				layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+				.addGroup(layout.createSequentialGroup()
+						.addComponent(pregunta)
+						)
+				.addGroup(layout.createSequentialGroup()
+						.addComponent(valor)
+						.addComponent(aceptar6)
+						)
+				);
+		layout.setVerticalGroup(
+				layout.createSequentialGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+						.addComponent(pregunta)
+						)
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+						.addComponent(valor)
+						.addComponent(aceptar6)
+						)
+				);
+		
+		return panelContenido;
+	}
+
+	private Component crearPaneD() {
+		// TODO Auto-generated method stub
+		JPanel panelContenido = new JPanel();
+		GroupLayout layout = new GroupLayout(panelContenido);
+		panelContenido.setLayout(layout);
+		layout.setAutoCreateGaps(true);
+		layout.setAutoCreateContainerGaps(true);
+		red = new JCheckBox("red");
+		red.setMnemonic(KeyEvent.VK_R); 
+	    red.setSelected(true);
+		green = new JCheckBox("green");
+		green.setMnemonic(KeyEvent.VK_G); 
+	    green.setSelected(true);
+		blue = new JCheckBox("blue");
+		blue.setMnemonic(KeyEvent.VK_B); 
+	    blue.setSelected(true);
+		
+		red.addItemListener(this);
+		green.addItemListener(this);
+		blue.addItemListener(this);
+		
+		layout.setHorizontalGroup(
+				layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+				.addGroup(layout.createSequentialGroup()
+						.addComponent(red)
+						.addComponent(green)
+						.addComponent(blue)
+						)
+				);
+		layout.setVerticalGroup(
+				layout.createSequentialGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+						.addComponent(red)
+						.addComponent(green)
+						.addComponent(blue)
+						)
+				);
+		
+		return panelContenido;
+	}
+
+	private Component crearPanelEspecificarHistograma() {
+		JPanel panelContenido = new JPanel();
+		GroupLayout layout = new GroupLayout(panelContenido);
+		panelContenido.setLayout(layout);
+		layout.setAutoCreateGaps(true);
+		layout.setAutoCreateContainerGaps(true);
+		imagenDiferencia = new JButton("Imagen");
+		aceptar5 = new JButton("Aceptar");
+		
+		aceptar5.addActionListener(this);
+		imagenDiferencia.addActionListener(this);
+		
+		layout.setHorizontalGroup(
+				layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+				.addGroup(layout.createSequentialGroup()
+						.addComponent(imagenDiferencia)
+						.addComponent(aceptar5)
+						)
+				);
+		layout.setVerticalGroup(
+				layout.createSequentialGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+						.addComponent(imagenDiferencia)
+						.addComponent(aceptar5)
+						)
+				);
+		
+		return panelContenido;
+	}
+
+	private Component crearPanelDiferencia() {
+		JPanel panelContenido = new JPanel();
+		GroupLayout layout = new GroupLayout(panelContenido);
+		panelContenido.setLayout(layout);
+		layout.setAutoCreateGaps(true);
+		layout.setAutoCreateContainerGaps(true);
+		valor = new JTextField(10);
+		imagenDiferencia = new JButton("Imagen");
+		aceptar4 = new JButton("Aceptar");
+		
+		aceptar4.addActionListener(this);
+		imagenDiferencia.addActionListener(this);
+		
+		layout.setHorizontalGroup(
+				layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+				.addGroup(layout.createSequentialGroup()
+						.addComponent(valor)
+						.addComponent(imagenDiferencia)
+						.addComponent(aceptar4)
+						)
+				);
+		layout.setVerticalGroup(
+				layout.createSequentialGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+						.addComponent(valor)
+						.addComponent(imagenDiferencia)
+						.addComponent(aceptar4)
+						)
+				);
+		
+		return panelContenido;
+	}
+
+	private Component crearPanelGamma() {
+		JPanel panelContenido = new JPanel();
+		GroupLayout layout = new GroupLayout(panelContenido);
+		panelContenido.setLayout(layout);
+		layout.setAutoCreateGaps(true);
+		layout.setAutoCreateContainerGaps(true);
+		valor = new JTextField(10);
+		aceptar3 = new JButton("Aceptar");
+		
+		aceptar3.addActionListener(this);
+		
+		layout.setHorizontalGroup(
+				layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+				.addGroup(layout.createSequentialGroup()
+						.addComponent(valor)
+						.addComponent(aceptar3)
+						)
+				);
+		layout.setVerticalGroup(
+				layout.createSequentialGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+						.addComponent(valor)
+						.addComponent(aceptar3)
+						)
+				);
+		
+		return panelContenido;
+	}
+
+	private Component crearPaneTL(int cantidad) {
+		JPanel panelContenido = new JPanel();
+		GroupLayout layout = new GroupLayout(panelContenido);
+		panelContenido.setLayout(layout);
+		layout.setAutoCreateGaps(true);
+		layout.setAutoCreateContainerGaps(true);
+		alfa = new JTextField[cantidad];
+		beta = new JTextField[cantidad];
+		min = new JTextField[cantidad];
+		max = new JTextField[cantidad];
+		for (int i = 0; i < cantidad; i++){
+			alfa[i] = new JTextField(10);
+			beta[i] = new JTextField(10);
+			min[i] = new JTextField(10);
+			max[i] = new JTextField(10);
+		}
+		
+		JLabel v1 = new JLabel("V1:");
+		JLabel v0 = new JLabel(" + V0* ");
+		aceptar2 = new JButton("Aceptar");
+		
+		aceptar2.addActionListener(this);
+		
+		ParallelGroup grupoHorizontal = layout.createParallelGroup(GroupLayout.Alignment.LEADING);
+		SequentialGroup grupoSecuencial = layout.createSequentialGroup();
+		
+		for (int i = 0; i < cantidad; i++){
+			grupoHorizontal.addGroup(layout.createSequentialGroup()
+							.addComponent(v1)
+							.addComponent(alfa[i])
+							.addComponent(v0)
+							.addComponent(beta[i])
+							.addComponent(min[i])
+							.addComponent(max[i])
+					);
+		}
+		for (int i = 0; i < cantidad; i++){
+			grupoSecuencial.addGroup((layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+				.addComponent(v1)
+				.addComponent(alfa[i])
+				.addComponent(v0)
+				.addComponent(beta[i])
+				.addComponent(min[i])
+				.addComponent(max[i])
+				)
+			);
+		}
+		
+		layout.setHorizontalGroup(
+				layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+					.addGroup(grupoHorizontal)
+					.addGroup(layout.createSequentialGroup()	
+							.addComponent(aceptar2)
+					)
+				);
+		layout.setVerticalGroup(
+				layout.createSequentialGroup()
+				.addGroup(grupoSecuencial)
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+						.addComponent(aceptar2)
+					)
+				);
+		
+		return panelContenido;
+	}
+
+	private Component crearPaneContraste() {
+		JPanel panelContenido = new JPanel();
+		GroupLayout layout = new GroupLayout(panelContenido);
+		panelContenido.setLayout(layout);
+		layout.setAutoCreateGaps(true);
+		layout.setAutoCreateContainerGaps(true);
+		valor = new JTextField(10);
+		aceptar1 = new JButton("Aceptar");
+		
+		aceptar1.addActionListener(this);
+		
+		layout.setHorizontalGroup(
+				layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+				.addGroup(layout.createSequentialGroup()
+						.addComponent(valor)
+						.addComponent(aceptar1)
+						)
+				);
+		layout.setVerticalGroup(
+				layout.createSequentialGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+						.addComponent(valor)
+						.addComponent(aceptar1)
+						)
+				);
+		
+		return panelContenido;
+	}
+
+	private ChartPanel crearPanelHistograma() {
+		// TODO Auto-generated method stub
+		JFreeChart chart = null;
+		DefaultCategoryDataset auxDataset = new DefaultCategoryDataset();
+		HistogramDataset auxHistDataset = new HistogramDataset();
+        Raster raster = backEnd.getImagenBf().getRaster();
+        final int w = backEnd.getImagenBf().getWidth();
+        final int h = backEnd.getImagenBf().getHeight();
+        double[] r = new double[w * h +2];
+        r = raster.getSamples(0, 0, w, h, 0, r);
+        double[] redSamples = r.clone();
+        r = raster.getSamples(0, 0, w, h, 1, r);
+        double[] greenSamples = r.clone();
+        r = raster.getSamples(0, 0, w, h, 2, r);
+        double[] blueSamples = r.clone();
+        if(!isAcumulativo) {
+        	if(backEnd.getBits() == 8) {
+        		r = raster.getSamples(0, 0, w, h, 0, r);
+        		auxHistDataset.addSeries("Luminosidad", r, 256);
+        		backEnd.setDataset(auxHistDataset);
+        	}
+        	else {  if(j==1) { 
+		        r = raster.getSamples(0, 0, w, h, 0, r);
+		        auxHistDataset.addSeries("Red", r, 256);
+		        r = raster.getSamples(0, 0, w, h, 1, r);
+		        auxHistDataset.addSeries("Green", r, 256);
+		        r = raster.getSamples(0, 0, w, h, 2, r);
+		        auxHistDataset.addSeries("Blue", r, 256);
+		        backEnd.setDataset(auxHistDataset);
+		        }
+		        //Histograma a color
+		        if(j==0){
+		        	r = ArrayMaths.multiply(raster.getSamples(0, 0, w, h, 0, r),0.33);
+		        	r = ArrayMaths.Add(r , ArrayMaths.multiply(raster.getSamples(0, 0, w, h, 1, r),0.33));
+		        	r = ArrayMaths.Add(r , ArrayMaths.multiply(raster.getSamples(0, 0, w, h, 2, r),0.33));
+		        	auxHistDataset.addSeries("Luminosidad", r, 256);
+		        	backEnd.setDataset(auxHistDataset);
+		        }
+        	}
+        } else {
+        	if(j==1) { 
+    	        r = ArrayMaths.toDouble(ArrayMaths.HistogramaAcumulativo(redSamples));
+    	        for (int i = 0; i < r.length; i++) {
+	        		auxDataset.setValue(r[i],"Red",Integer.toString(i));
+	        	}
+    	        r = ArrayMaths.toDouble(ArrayMaths.HistogramaAcumulativo(greenSamples));
+    	        for (int i = 0; i < r.length; i++) {
+	        		auxDataset.setValue(r[i],"Green",Integer.toString(i));
+	        	}
+    	        r = ArrayMaths.toDouble(ArrayMaths.HistogramaAcumulativo(blueSamples));
+    	        for (int i = 0; i < r.length; i++) {
+	        		auxDataset.setValue(r[i],"Blue",Integer.toString(i));
+	        	}
+    	        backEnd.setDataset(auxDataset);
+    	        }
+    	        //Histograma a color
+    	        if(j==0){
+    	        	r = Arrays.stream(raster.getSamples(0, 0, w, h, 0, r)).map(i -> i * 0.33).toArray();
+    	        	r = ArrayMaths.Add(r , Arrays.stream(raster.getSamples(0, 0, w, h, 1, r)).map(i -> i * 0.33).toArray());
+    	        	r = ArrayMaths.Add(r , Arrays.stream(raster.getSamples(0, 0, w, h, 2, r)).map(i -> i * 0.33).toArray());
+    	        	r = ArrayMaths.toDouble(ArrayMaths.HistogramaAcumulativo(r));
+    	        	for (int i = 0; i < r.length; i++) {
+    	        		auxDataset.setValue(r[i],"luminosidad",Integer.toString(i));
+    	        	}
+    	        	backEnd.setDataset(auxDataset);
+    	        }
+
+        }
+       
+        if(isAcumulativo) {
+        	chart = ChartFactory.createBarChart("Histogram", "Value","Count", (CategoryDataset) backEnd.getDataSet());
+        } else {
+        	chart = ChartFactory.createHistogram("Histogram", "Value", "Count", backEnd.getHDataSet(), PlotOrientation.VERTICAL, true, true, false);
+        	XYPlot plot = (XYPlot) chart.getPlot();
+            renderer = (XYBarRenderer) plot.getRenderer();
+            renderer.setBarPainter(new StandardXYBarPainter());
+            // translucent red, green & blue
+            Paint[] paintArray = {
+                
+            	new Color(0x80ff0000, true),
+               	new Color(0x8000ff00, true),
+               	new Color(0x800000ff, true)
+                //Colores color
+            };
+            Paint[] black = {new Color(0xff000000, true)};
+            if(j==0 || backEnd.getBits() == 8) paintArray = black; 
+            
+            plot.setDrawingSupplier(new DefaultDrawingSupplier(
+                paintArray,
+                DefaultDrawingSupplier.DEFAULT_FILL_PAINT_SEQUENCE,
+                DefaultDrawingSupplier.DEFAULT_OUTLINE_PAINT_SEQUENCE,
+                DefaultDrawingSupplier.DEFAULT_STROKE_SEQUENCE,
+                DefaultDrawingSupplier.DEFAULT_OUTLINE_STROKE_SEQUENCE,
+                DefaultDrawingSupplier.DEFAULT_SHAPE_SEQUENCE));
+        }
+            ChartPanel panel = new ChartPanel(chart);
+            panel.setMouseWheelEnabled(true);
+            return panel;
+	}
+	
 
 	private Component crearPaneBrillo() {
 		JPanel panelContenido = new JPanel();
@@ -133,18 +638,28 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 		layout.setAutoCreateGaps(true);
 		layout.setAutoCreateContainerGaps(true);
 		openImage = new JButton("Abrir Imagen");
+		guardar = new JButton("Guardar");
 		histograma = new JButton("Mostrar Histograma");
 		color = new JButton ("color");
+		acumulativo = new JButton("H. Acum");
 		datos = new JLabel("");
 		posRaton = new JLabel("");
 		imagen = new JLabel();
-		String[] listado = {"brillo"};
+		String[] listado = {"brillo","contraste", "Transformacion Lineal", "Escala de grises", "Negativo", "Daltonismo"};
 		transformacionesLineales = new JComboBox(listado);
+		String[] listado1 = {"Gamma"};
+		transformacionesNoLineales = new JComboBox(listado1);
+		String[] listado2 = {"Ecualizar" , "Diferencia", "Especificar"};
+		operacionesHistograma = new JComboBox(listado2);
 		
 		openImage.addActionListener(this);
+		guardar.addActionListener(this);
 		histograma.addActionListener(this);
 		color.addActionListener(this);
+		acumulativo.addActionListener(this);
 		transformacionesLineales.addActionListener(this);
+		transformacionesNoLineales.addActionListener(this);
+		operacionesHistograma.addActionListener(this);
 		
 		imagen.addMouseListener(this);
 		
@@ -154,10 +669,15 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 		layout.setHorizontalGroup(
 				layout.createParallelGroup(GroupLayout.Alignment.LEADING)
 				.addGroup(layout.createSequentialGroup()
-						.addComponent(openImage)
+						.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+								.addComponent(openImage)
+								.addComponent(guardar))
 						.addComponent(histograma)
 						.addComponent(color)
+						.addComponent(acumulativo)
 						.addComponent(transformacionesLineales)
+						.addComponent(transformacionesNoLineales)
+						.addComponent(operacionesHistograma)
 						)
 				.addGroup(layout.createSequentialGroup()
 						.addComponent(imagen)
@@ -170,10 +690,15 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 		layout.setVerticalGroup(
 				layout.createSequentialGroup()
 				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-						.addComponent(openImage)
+						.addGroup(layout.createSequentialGroup()
+								.addComponent(openImage)
+								.addComponent(guardar))
 						.addComponent(histograma)
 						.addComponent(color)
+						.addComponent(acumulativo)
 						.addComponent(transformacionesLineales)
+						.addComponent(transformacionesNoLineales)
+						.addComponent(operacionesHistograma)
 						)
 				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
 						.addComponent(imagen)
@@ -254,6 +779,22 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 		// TODO Auto-generated method stub
 		//backEnd.guardarSeleccion(e);
 		
+	}
+
+	@Override
+	public void itemStateChanged(ItemEvent e) {
+		// TODO Auto-generated method stub
+		Object source = e.getItemSelectable();
+
+	    if (source == red) {
+	        backEnd.daltonismo(1);
+	    } else if (source == green) {
+	    	backEnd.daltonismo(2);
+	    } else if (source == blue) {
+	    	backEnd.daltonismo(3);
+	    }
+	    imagen.setIcon(backEnd.getImagen());
+		pack();
 	}
 
 

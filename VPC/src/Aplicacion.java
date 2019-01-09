@@ -1,3 +1,5 @@
+import java.util.logging.Logger;
+
 /**
  * VPC Practica imagen
  * Aplicacion.java
@@ -7,6 +9,9 @@
  * @version 0.1 04/10/2018
  */
 public class Aplicacion {
+	
+	public static final Logger logger = Logger.getLogger("log");
+	
 	/**
 	 * Constructor de la clase aplicación
 	 */
