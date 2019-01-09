@@ -23,7 +23,10 @@ import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.StandardXYBarPainter;
 import org.jfree.chart.renderer.xy.XYBarRenderer;
+import org.jfree.data.category.CategoryDataset;
+import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.statistics.HistogramDataset;
+import org.jfree.data.xy.IntervalXYDataset;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -498,43 +501,57 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 
 	private ChartPanel crearPanelHistograma() {
 		// TODO Auto-generated method stub
-		HistogramDataset auxDataset = new HistogramDataset();
+		JFreeChart chart = null;
+		DefaultCategoryDataset auxDataset = new DefaultCategoryDataset();
+		HistogramDataset auxHistDataset = new HistogramDataset();
         Raster raster = backEnd.getImagenBf().getRaster();
         final int w = backEnd.getImagenBf().getWidth();
         final int h = backEnd.getImagenBf().getHeight();
-        double[] r = new double[w * h +1];
+        double[] r = new double[w * h +2];
+        r = raster.getSamples(0, 0, w, h, 0, r);
+        double[] redSamples = r.clone();
+        r = raster.getSamples(0, 0, w, h, 1, r);
+        double[] greenSamples = r.clone();
+        r = raster.getSamples(0, 0, w, h, 2, r);
+        double[] blueSamples = r.clone();
         if(!isAcumulativo) {
         	if(backEnd.getBits() == 8) {
         		r = raster.getSamples(0, 0, w, h, 0, r);
-        		auxDataset.addSeries("Luminosidad", r, 256);
-        		backEnd.setDataset(auxDataset);
+        		auxHistDataset.addSeries("Luminosidad", r, 256);
+        		backEnd.setDataset(auxHistDataset);
         	}
         	else {  if(j==1) { 
 		        r = raster.getSamples(0, 0, w, h, 0, r);
-		        auxDataset.addSeries("Red", r, 256);
+		        auxHistDataset.addSeries("Red", r, 256);
 		        r = raster.getSamples(0, 0, w, h, 1, r);
-		        auxDataset.addSeries("Green", r, 256);
+		        auxHistDataset.addSeries("Green", r, 256);
 		        r = raster.getSamples(0, 0, w, h, 2, r);
-		        auxDataset.addSeries("Blue", r, 256);
-		        backEnd.setDataset(auxDataset);
+		        auxHistDataset.addSeries("Blue", r, 256);
+		        backEnd.setDataset(auxHistDataset);
 		        }
 		        //Histograma a color
 		        if(j==0){
 		        	r = ArrayMaths.multiply(raster.getSamples(0, 0, w, h, 0, r),0.33);
 		        	r = ArrayMaths.Add(r , ArrayMaths.multiply(raster.getSamples(0, 0, w, h, 1, r),0.33));
 		        	r = ArrayMaths.Add(r , ArrayMaths.multiply(raster.getSamples(0, 0, w, h, 2, r),0.33));
-		        	auxDataset.addSeries("Luminosidad", r, 256);
-		        	backEnd.setDataset(auxDataset);
+		        	auxHistDataset.addSeries("Luminosidad", r, 256);
+		        	backEnd.setDataset(auxHistDataset);
 		        }
         	}
         } else {
         	if(j==1) { 
-    	        r = ArrayMaths.toDouble(ArrayMaths.HistogramaAcumulativo(raster.getSamples(0, 0, w, h, 0, r)));
-    	        auxDataset.addSeries("Red", r, 256);
-    	        r = ArrayMaths.toDouble(ArrayMaths.HistogramaAcumulativo(raster.getSamples(0, 0, w, h, 1, r)));
-    	        auxDataset.addSeries("Green", r, 256);
-    	        r = ArrayMaths.toDouble(ArrayMaths.HistogramaAcumulativo(raster.getSamples(0, 0, w, h, 2, r)));
-    	        auxDataset.addSeries("Blue", r, 256);
+    	        r = ArrayMaths.toDouble(ArrayMaths.HistogramaAcumulativo(redSamples));
+    	        for (int i = 0; i < r.length; i++) {
+	        		auxDataset.setValue(r[i],"Red",Integer.toString(i));
+	        	}
+    	        r = ArrayMaths.toDouble(ArrayMaths.HistogramaAcumulativo(greenSamples));
+    	        for (int i = 0; i < r.length; i++) {
+	        		auxDataset.setValue(r[i],"Green",Integer.toString(i));
+	        	}
+    	        r = ArrayMaths.toDouble(ArrayMaths.HistogramaAcumulativo(blueSamples));
+    	        for (int i = 0; i < r.length; i++) {
+	        		auxDataset.setValue(r[i],"Blue",Integer.toString(i));
+	        	}
     	        backEnd.setDataset(auxDataset);
     	        }
     	        //Histograma a color
@@ -543,15 +560,19 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
     	        	r = ArrayMaths.Add(r , Arrays.stream(raster.getSamples(0, 0, w, h, 1, r)).map(i -> i * 0.33).toArray());
     	        	r = ArrayMaths.Add(r , Arrays.stream(raster.getSamples(0, 0, w, h, 2, r)).map(i -> i * 0.33).toArray());
     	        	r = ArrayMaths.toDouble(ArrayMaths.HistogramaAcumulativo(r));
-    	        	auxDataset.addSeries("Luminosidad", r, 256);
+    	        	for (int i = 0; i < r.length; i++) {
+    	        		auxDataset.setValue(r[i],"luminosidad",Integer.toString(i));
+    	        	}
     	        	backEnd.setDataset(auxDataset);
     	        }
 
         }
        
-        JFreeChart chart = ChartFactory.createHistogram("Histogram", "Value",
-                "Count", backEnd.getDataSet(), PlotOrientation.VERTICAL, true, true, false);
-            XYPlot plot = (XYPlot) chart.getPlot();
+        if(isAcumulativo) {
+        	chart = ChartFactory.createBarChart("Histogram", "Value","Count", (CategoryDataset) backEnd.getDataSet());
+        } else {
+        	chart = ChartFactory.createHistogram("Histogram", "Value", "Count", backEnd.getHDataSet(), PlotOrientation.VERTICAL, true, true, false);
+        	XYPlot plot = (XYPlot) chart.getPlot();
             renderer = (XYBarRenderer) plot.getRenderer();
             renderer.setBarPainter(new StandardXYBarPainter());
             // translucent red, green & blue
@@ -572,6 +593,7 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
                 DefaultDrawingSupplier.DEFAULT_STROKE_SEQUENCE,
                 DefaultDrawingSupplier.DEFAULT_OUTLINE_STROKE_SEQUENCE,
                 DefaultDrawingSupplier.DEFAULT_SHAPE_SEQUENCE));
+        }
             ChartPanel panel = new ChartPanel(chart);
             panel.setMouseWheelEnabled(true);
             return panel;

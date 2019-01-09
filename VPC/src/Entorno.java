@@ -31,6 +31,9 @@ import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.StandardXYBarPainter;
 import org.jfree.chart.renderer.xy.XYBarRenderer;
+import org.jfree.data.category.CategoryDataset;
+import org.jfree.data.category.DefaultCategoryDataset;
+import org.jfree.data.general.Dataset;
 import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.IntervalXYDataset;
 
@@ -40,7 +43,8 @@ public class Entorno  {
 	private BufferedImage imagenBf;
 	private String direccion,tipoImagen;
 	private int bits, color;
-	private HistogramDataset dataset;
+	private HistogramDataset histogramDataset;
+	private DefaultCategoryDataset acumDataset;
 	private Linea seleccion;
 	//private JTextField valor;
 	//private JButton aceptar;
@@ -72,9 +76,9 @@ public class Entorno  {
 		return bits;
 	}
 
-	public IntervalXYDataset getDataSet() {
+	public DefaultCategoryDataset getDataSet() {
 		// TODO Auto-generated method stub
-		return dataset;
+		return acumDataset;
 	}
 
 	public void guardarSeleccion(MouseEvent e) {
@@ -157,9 +161,9 @@ public class Entorno  {
 		return imagenBf;
 	}
 
-	public void setDataset(HistogramDataset auxDataset) {
+	public void setDataset(DefaultCategoryDataset auxDataset) {
 		// TODO Auto-generated method stub
-		dataset = auxDataset;
+		acumDataset = auxDataset;
 		
 	}
 
@@ -571,6 +575,16 @@ public class Entorno  {
 			}
 		}
 		updateIcon();
+	}
+
+	public void setDataset(HistogramDataset auxHistDataset) {
+		// TODO Auto-generated method stub
+		histogramDataset = auxHistDataset;
+	}
+
+	public IntervalXYDataset getHDataSet() {
+		// TODO Auto-generated method stub
+		return histogramDataset;
 	}
 
 }
