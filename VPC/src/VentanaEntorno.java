@@ -60,9 +60,9 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 	private static final long serialVersionUID = 1L;
 	private Entorno backEnd;
 	private JPanel panelContenido, panelHistograma;
-	private JButton openImage, histograma, color, acumulativo , aceptar, aceptar1, aceptar2, aceptar3, aceptar4, aceptar5, aceptar6, imagenDiferencia, guardar;
+	private JButton openImage, histograma, color, acumulativo , aceptar, aceptar1, aceptar2, aceptar3, aceptar4, aceptar5, aceptar6, imagenDiferencia, guardar, aceptar7, escalado;
 	private JLabel imagen, datos, posRaton;
-	private JComboBox transformacionesLineales, transformacionesNoLineales, operacionesHistograma;
+	private JComboBox transformacionesLineales, transformacionesNoLineales, operacionesHistograma, rotaciones;
 	private JCheckBox red, green, blue;
 	private JTextField valor, valor1, alfa[], beta[], min[], max[];
 	private final JFileChooser fc = new JFileChooser();
@@ -73,7 +73,7 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 	protected SourceDataLine sourceDataLine;
 	protected boolean stopPlayback = false, isAcumulativo = false;
 	private XYBarRenderer renderer;
-	private JFrame h, b, c, tf, g, d, e, dt, tff;
+	private JFrame h, b, c, tf, g, d, e, dt, tff, es;
 	private String path;
 	/**
 	 * Metodo que observa las acciones realizadas en la interfaz grafica
@@ -229,9 +229,71 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 		        tff.setLocationRelativeTo(null);
 		        tff.setVisible(true);
 				
+		}else if(e.getSource() == rotaciones){
+			if((rotaciones.getSelectedItem()).equals("Espejo Horizontal")){
+				backEnd.espejoHorizontal();
+			}else if((rotaciones.getSelectedItem()).equals("traspuesta")){
+				backEnd.transpuesta();
+			}else if((rotaciones.getSelectedItem()).equals("rotar 90")){
+				backEnd.rot90();
 			}
+			else if((rotaciones.getSelectedItem()).equals("rotar 180")){
+				backEnd.rot180();
+			}
+			else if((rotaciones.getSelectedItem()).equals("rotar 270")){
+				backEnd.rot270();
+			}
+			else {
+				backEnd.espejoVertical();
+			}
+			
+		}else if(e.getSource() == escalado){
+			es = new JFrame("Escalado");
+	        es.add(crearPanelEscalado());
+	        es.pack();
+	        es.setLocationRelativeTo(null);
+	        es.setVisible(true);
+		}else if(e.getSource() == aceptar7){
+			int w = Integer.parseInt(valor.getText());
+			int h = Integer.parseInt(valor1.getText());
+			backEnd.escalado(w, h);
+		}
+		backEnd.updateIcon();
 		imagen.setIcon(backEnd.getImagen());
 		pack();
+	}
+
+	private Component crearPanelEscalado() {
+		// TODO Auto-generated method stub
+		JPanel panelContenido = new JPanel();
+		GroupLayout layout = new GroupLayout(panelContenido);
+		panelContenido.setLayout(layout);
+		layout.setAutoCreateGaps(true);
+		layout.setAutoCreateContainerGaps(true);
+		valor = new JTextField(10);
+		valor1 = new JTextField(10);
+		aceptar7 = new JButton("Aceptar");
+		
+		aceptar7.addActionListener(this);
+		
+		layout.setHorizontalGroup(
+				layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+				.addGroup(layout.createSequentialGroup()
+						.addComponent(valor)
+						.addComponent(valor1)
+						.addComponent(aceptar7)
+						)
+				);
+		layout.setVerticalGroup(
+				layout.createSequentialGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+						.addComponent(valor)
+						.addComponent(valor1)
+						.addComponent(aceptar7)
+						)
+				);
+		
+		return panelContenido;
 	}
 
 	private Component creadorPaneTL() {
@@ -642,6 +704,7 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 		histograma = new JButton("Mostrar Histograma");
 		color = new JButton ("color");
 		acumulativo = new JButton("H. Acum");
+		escalado = new JButton("Escalado");
 		datos = new JLabel("");
 		posRaton = new JLabel("");
 		imagen = new JLabel();
@@ -651,6 +714,8 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 		transformacionesNoLineales = new JComboBox(listado1);
 		String[] listado2 = {"Ecualizar" , "Diferencia", "Especificar"};
 		operacionesHistograma = new JComboBox(listado2);
+		String[] listado3 = {"Espejo Horizontal", "Espejo Vertical", "traspuesta", "rotar 90",  "rotar 180",  "rotar 270"};
+		rotaciones = new JComboBox(listado3);
 		
 		openImage.addActionListener(this);
 		guardar.addActionListener(this);
@@ -660,6 +725,8 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 		transformacionesLineales.addActionListener(this);
 		transformacionesNoLineales.addActionListener(this);
 		operacionesHistograma.addActionListener(this);
+		rotaciones.addActionListener(this);
+		escalado.addActionListener(this);
 		
 		imagen.addMouseListener(this);
 		
@@ -672,8 +739,12 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 						.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
 								.addComponent(openImage)
 								.addComponent(guardar))
-						.addComponent(histograma)
-						.addComponent(color)
+						.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+								.addComponent(histograma)
+								.addComponent(rotaciones))
+						.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+								.addComponent(color)
+								.addComponent(escalado))
 						.addComponent(acumulativo)
 						.addComponent(transformacionesLineales)
 						.addComponent(transformacionesNoLineales)
@@ -693,8 +764,12 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 						.addGroup(layout.createSequentialGroup()
 								.addComponent(openImage)
 								.addComponent(guardar))
-						.addComponent(histograma)
-						.addComponent(color)
+						.addGroup(layout.createSequentialGroup()
+								.addComponent(histograma)
+								.addComponent(rotaciones))
+						.addGroup(layout.createSequentialGroup()
+								.addComponent(color)
+								.addComponent(escalado))
 						.addComponent(acumulativo)
 						.addComponent(transformacionesLineales)
 						.addComponent(transformacionesNoLineales)

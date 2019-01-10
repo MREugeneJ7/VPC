@@ -288,7 +288,7 @@ public class Entorno  {
 	    				if((diff < 0) && (aux > j)) {
 		    				rgb = new Color(rgb.getRed() , rgb.getGreen(), j );
 		    				diff++;
-		    				histograma[i][aux]--;
+		    				if(aux < histograma[i].length && aux > 0) histograma[i][aux]--;
 		    				imagenBf.setRGB(x, y, rgb.getRGB());
 		    			}else if((diff > 0) && (aux == j)) {
 		    				int random = (int)(Math.random() * (histograma[i].length - j)) + j;
@@ -410,7 +410,7 @@ public class Entorno  {
 	    				if((diff < 0) && (aux > j)) {
 		    				rgb = new Color(rgb.getRed() , j, rgb.getBlue() );
 		    				diff++;
-		    				histograma[i][aux]--;
+		    				if(aux < histograma[i].length && aux > 0)  histograma[i][aux]--;
 		    				imagenBf.setRGB(x, y, rgb.getRGB());
 		    			}else if((diff > 0) && (aux == j)) {
 		    				int random = (int)(Math.random() * (histograma[i].length - j)) + j;
@@ -424,7 +424,7 @@ public class Entorno  {
 	    				if((diff < 0) && (aux > j)) {
 		    				rgb = new Color(rgb.getRed() , rgb.getGreen(), j );
 		    				diff++;
-		    				histograma[i][aux]--;
+		    				if(aux < histograma[i].length && aux > 0) histograma[i][aux]--;
 		    				imagenBf.setRGB(x, y, rgb.getRGB());
 		    			}else if((diff > 0) && (aux == j)) {
 		    				int random = (int)(Math.random() * (histograma[i].length - j)) + j;
@@ -460,7 +460,7 @@ public class Entorno  {
 		updateIcon();
 	}
 	
-	private void updateIcon() {
+	void updateIcon() {
 		double factor = 0;
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		int height = (int)screenSize.getHeight() - 200;
@@ -585,6 +585,86 @@ public class Entorno  {
 	public IntervalXYDataset getHDataSet() {
 		// TODO Auto-generated method stub
 		return histogramDataset;
+	}
+	
+	public void espejoHorizontal(){
+		BufferedImage buffered = new BufferedImage(imagenBf.getWidth(), imagenBf.getHeight(), Image.SCALE_SMOOTH);
+		for(int i = 0; i < imagenBf.getWidth();i++) {
+			for(int h =0; h < imagenBf.getHeight();h++) {
+				Color color = new Color(imagenBf.getRGB(i, h));
+				buffered.setRGB(imagenBf.getWidth() - (i + 1), h, color.getRGB());
+			}
+		}
+		imagenBf = buffered;
+		updateIcon();
+	}
+	
+	public void espejoVertical(){
+		BufferedImage buffered = new BufferedImage(imagenBf.getWidth(), imagenBf.getHeight(), Image.SCALE_SMOOTH);
+		for(int i = 0; i < imagenBf.getWidth();i++) {
+			for(int h =0; h < imagenBf.getHeight();h++) {
+				Color color = new Color(imagenBf.getRGB(i, h));
+				buffered.setRGB(i, imagenBf.getHeight() - (h + 1), color.getRGB());
+			}
+		}
+		imagenBf = buffered;
+		updateIcon();
+	}
+	
+	public void transpuesta(){
+		BufferedImage buffered = new BufferedImage(imagenBf.getHeight(), imagenBf.getWidth(), Image.SCALE_SMOOTH);
+		for(int i = 0; i < imagenBf.getWidth();i++) {
+			for(int h =0; h < imagenBf.getHeight();h++) {
+				Color color = new Color(imagenBf.getRGB(i, h));
+				buffered.setRGB(h, i, color.getRGB());
+			}
+		}
+		imagenBf = buffered;
+		updateIcon();
+	}
+	
+	public void rot90(){
+		BufferedImage buffered = new BufferedImage(imagenBf.getHeight(), imagenBf.getWidth(), Image.SCALE_SMOOTH);
+		for(int i = 0; i < imagenBf.getWidth();i++) {
+			for(int h =0; h < imagenBf.getHeight();h++) {
+				Color color = new Color(imagenBf.getRGB(i, h));
+				buffered.setRGB(h, imagenBf.getWidth() - (i + 1), color.getRGB());
+			}
+		}
+		imagenBf = buffered;
+		updateIcon();
+	}
+	
+	public void rot180(){
+		BufferedImage buffered = new BufferedImage(imagenBf.getWidth(), imagenBf.getHeight(), Image.SCALE_SMOOTH);
+		for(int i = 0; i < imagenBf.getWidth();i++) {
+			for(int h =0; h < imagenBf.getHeight();h++) {
+				Color color = new Color(imagenBf.getRGB(i, h));
+				buffered.setRGB(imagenBf.getWidth() - (i + 1), imagenBf.getHeight() - (h + 1), color.getRGB());
+			}
+		}
+		imagenBf = buffered;
+		updateIcon();
+	}
+	
+	public void rot270(){
+		BufferedImage buffered = new BufferedImage(imagenBf.getHeight(), imagenBf.getWidth(), Image.SCALE_SMOOTH);
+		for(int i = 0; i < imagenBf.getWidth();i++) {
+			for(int h =0; h < imagenBf.getHeight();h++) {
+				Color color = new Color(imagenBf.getRGB(i, h));
+				buffered.setRGB(imagenBf.getHeight() - (h + 1), i, color.getRGB());
+			}
+		}
+		imagenBf = buffered;
+		updateIcon();
+	}
+	
+	public void escalado(int w, int h){
+		Image image = imagenBf.getScaledInstance(w, h, Image.SCALE_SMOOTH);
+		BufferedImage buffered = new BufferedImage(w, h, Image.SCALE_SMOOTH);
+		buffered.getGraphics().drawImage(image, 0, 0 , null);
+		imagenBf = buffered;
+		updateIcon();
 	}
 
 }
