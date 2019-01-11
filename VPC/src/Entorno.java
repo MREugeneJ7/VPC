@@ -462,6 +462,7 @@ public class Entorno implements ImageObserver  {
 				imagenBf.setRGB(i, j, color.getRGB());
 			}
 		}
+		bits = 8;
 		updateIcon();
 	}
 	
