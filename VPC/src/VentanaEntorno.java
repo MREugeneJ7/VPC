@@ -75,10 +75,13 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 	private XYBarRenderer renderer;
 	private JFrame h, b, c, tf, g, d, e, dt, tff, es;
 	private String path;
+	private JFrame r;
+	private JButton aceptar8;
 	/**
 	 * Metodo que observa las acciones realizadas en la interfaz grafica
 	 * 
 	 * @param e Evento que lanzo este metodo
+	 * @param aceptar8 
 	 */
 	public void actionPerformed(ActionEvent e) {
 		if(e.getSource() == openImage) {
@@ -236,14 +239,17 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 				backEnd.transpuesta();
 			}else if((rotaciones.getSelectedItem()).equals("rotar 90")){
 				backEnd.rot90();
-			}
-			else if((rotaciones.getSelectedItem()).equals("rotar 180")){
+			}else if((rotaciones.getSelectedItem()).equals("rotar 180")){
 				backEnd.rot180();
-			}
-			else if((rotaciones.getSelectedItem()).equals("rotar 270")){
+			}else if((rotaciones.getSelectedItem()).equals("rotar 270")){
 				backEnd.rot270();
-			}
-			else {
+			}else if((rotaciones.getSelectedItem()).equals("rotar")){
+				r = new JFrame("Rotacion");
+		        r.add(crearPanelRot());
+		        r.pack();
+		        r.setLocationRelativeTo(null);
+		        r.setVisible(true);
+			}else {
 				backEnd.espejoVertical();
 			}
 			
@@ -257,10 +263,43 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 			int w = Integer.parseInt(valor.getText());
 			int h = Integer.parseInt(valor1.getText());
 			backEnd.escalado(w, h);
+		}else if(e.getSource() == aceptar8){
+			int grados = Integer.parseInt(valor.getText());
+			backEnd.rotate(grados);
 		}
-		backEnd.updateIcon();
+		//backEnd.updateIcon();
 		imagen.setIcon(backEnd.getImagen());
 		pack();
+	}
+
+	private Component crearPanelRot() {
+		// TODO Auto-generated method stub
+		JPanel panelContenido = new JPanel();
+		GroupLayout layout = new GroupLayout(panelContenido);
+		panelContenido.setLayout(layout);
+		layout.setAutoCreateGaps(true);
+		layout.setAutoCreateContainerGaps(true);
+		valor = new JTextField(10);
+		aceptar8 = new JButton("Aceptar");
+		
+		aceptar8.addActionListener(this);
+		
+		layout.setHorizontalGroup(
+				layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+				.addGroup(layout.createSequentialGroup()
+						.addComponent(valor)
+						.addComponent(aceptar8)
+						)
+				);
+		layout.setVerticalGroup(
+				layout.createSequentialGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+						.addComponent(valor)
+						.addComponent(aceptar8)
+						)
+				);
+		
+		return panelContenido;
 	}
 
 	private Component crearPanelEscalado() {
@@ -714,7 +753,7 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 		transformacionesNoLineales = new JComboBox(listado1);
 		String[] listado2 = {"Ecualizar" , "Diferencia", "Especificar"};
 		operacionesHistograma = new JComboBox(listado2);
-		String[] listado3 = {"Espejo Horizontal", "Espejo Vertical", "traspuesta", "rotar 90",  "rotar 180",  "rotar 270"};
+		String[] listado3 = {"Espejo Horizontal", "Espejo Vertical", "traspuesta", "rotar 90",  "rotar 180",  "rotar 270", "rotar"};
 		rotaciones = new JComboBox(listado3);
 		
 		openImage.addActionListener(this);
