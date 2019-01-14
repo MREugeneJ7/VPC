@@ -42,7 +42,8 @@ public class Entorno  {
 	private ImageIcon imagen;
 	private BufferedImage imagenBf;
 	private String direccion,tipoImagen;
-	private int bits, color;
+	private int bits, color, maxLum, minLum, brillo;
+	private double contrast;
 	private HistogramDataset histogramDataset;
 	private DefaultCategoryDataset acumDataset;
 	private Linea seleccion;
@@ -56,7 +57,103 @@ public class Entorno  {
 		imagenBf = ImageIO.read(new File(direccion));
 		bits = imagenBf.getColorModel().getPixelSize();
 		seleccion = new Linea(imagenBf.getHeight()*imagenBf.getWidth());
+		minLum = calcMin();
+		maxLum = calcMax();
+		brillo = calcBrillo();
+		contrast = calcContrast();
 		updateIcon();
+	}
+
+	private double calcContrast() {
+		// TODO Auto-generated method stub
+		return (maxLum - minLum) / brillo;
+	}
+
+	private int calcBrillo() {
+		// TODO Auto-generated method stub
+		long[] histograma = new long[256];
+		final int w = imagenBf.getWidth();
+        final int h = imagenBf.getHeight();
+        Raster raster = imagenBf.getRaster();
+        double[] r = new double[w * h +1];
+        r = raster.getSamples(0, 0, w, h, 0, r);
+        double[] greenSamples = null;
+        double[] blueSamples = null;
+        r = raster.getSamples(0, 0, w, h, 0, r);
+        double[] redSamples = r.clone();
+        if(bits != 8){
+        	r = raster.getSamples(0, 0, w, h, 1, r);
+        	greenSamples = r.clone();
+        	r = raster.getSamples(0, 0, w, h, 2, r);
+        	blueSamples = r.clone();
+        }
+        histograma = ArrayMaths.Histograma(redSamples);
+	    if(bits != 8) {
+	    	double[] calculos = r;
+	    	calculos = ArrayMaths.multiply(r, 0.33);
+	    	calculos = ArrayMaths.Add(calculos ,ArrayMaths.multiply(greenSamples, 0.33));
+	    	calculos = ArrayMaths.Add(calculos ,ArrayMaths.multiply(blueSamples, 0.33));
+	    	histograma = ArrayMaths.Histograma(calculos);
+	    }
+		return ArrayMaths.lumAverage(histograma);
+	}
+
+	private int calcMax() {
+		// TODO Auto-generated method stub
+		long[] histograma = new long[256];
+		final int w = imagenBf.getWidth();
+        final int h = imagenBf.getHeight();
+        Raster raster = imagenBf.getRaster();
+        double[] r = new double[w * h +1];
+        r = raster.getSamples(0, 0, w, h, 0, r);
+        double[] greenSamples = null;
+        double[] blueSamples = null;
+        r = raster.getSamples(0, 0, w, h, 0, r);
+        double[] redSamples = r.clone();
+        if(bits != 8){
+        	r = raster.getSamples(0, 0, w, h, 1, r);
+        	greenSamples = r.clone();
+        	r = raster.getSamples(0, 0, w, h, 2, r);
+        	blueSamples = r.clone();
+        }
+	    histograma = ArrayMaths.Histograma(redSamples);
+	    if(bits != 8) {
+	    	double[] calculos = r;
+	    	calculos = ArrayMaths.multiply(r, 0.33);
+	    	calculos = ArrayMaths.Add(calculos ,ArrayMaths.multiply(greenSamples, 0.33));
+	    	calculos = ArrayMaths.Add(calculos ,ArrayMaths.multiply(blueSamples, 0.33));
+	    	histograma = ArrayMaths.Histograma(calculos);
+	    }
+		return ArrayMaths.MaxWithValue(histograma);
+	}
+
+	private int calcMin() {
+		// TODO Auto-generated method stub
+		long[] histograma = new long[256];
+		final int w = imagenBf.getWidth();
+        final int h = imagenBf.getHeight();
+        Raster raster = imagenBf.getRaster();
+        double[] r = new double[w * h +1];
+        r = raster.getSamples(0, 0, w, h, 0, r);
+        double[] greenSamples = null;
+        double[] blueSamples = null;
+        r = raster.getSamples(0, 0, w, h, 0, r);
+        double[] redSamples = r.clone();
+        if(bits != 8){
+        	r = raster.getSamples(0, 0, w, h, 1, r);
+        	greenSamples = r.clone();
+        	r = raster.getSamples(0, 0, w, h, 2, r);
+        	blueSamples = r.clone();
+        }
+	    histograma = ArrayMaths.Histograma(redSamples);
+	    if(bits != 8) {
+	    	double[] calculos = r;
+	    	calculos = ArrayMaths.multiply(r, 0.33);
+	    	calculos = ArrayMaths.Add(calculos ,ArrayMaths.multiply(greenSamples, 0.33));
+	    	calculos = ArrayMaths.Add(calculos ,ArrayMaths.multiply(blueSamples, 0.33));
+	    	histograma = ArrayMaths.Histograma(calculos);
+	    }
+		return ArrayMaths.MinWithValue(histograma);
 	}
 
 	public Entorno() {
@@ -665,6 +762,30 @@ public class Entorno  {
 		buffered.getGraphics().drawImage(image, 0, 0 , null);
 		imagenBf = buffered;
 		updateIcon();
+	}
+
+	public int getMax() {
+		// TODO Auto-generated method stub
+		calcMax();
+		return maxLum;
+	}
+
+	public int getMin() {
+		// TODO Auto-generated method stub
+		calcMin();
+		return minLum;
+	}
+
+	public int getBrillo() {
+		// TODO Auto-generated method stub
+		calcBrillo();
+		return brillo;
+	}
+
+	public double getContraste() {
+		// TODO Auto-generated method stub
+		calcContrast();
+		return contrast;
 	}
 
 }

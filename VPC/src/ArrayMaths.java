@@ -10,9 +10,9 @@ public class ArrayMaths {
 	public static long[] Histograma(double[] samples) {
 		// TODO Auto-generated method stub
 		long intensidad[];
-		intensidad = new long[max(samples)+1];
+		intensidad = new long[Max(samples)+1];
 		intensidad = put(0 , intensidad );
-		System.out.println(samples.length);
+		//System.out.println(samples.length);
 		for(int k = 0; k < samples.length; k++ ) {
 			intensidad[(int) samples[k]]++;
 			//System.out.println((int)samples[k]);
@@ -30,7 +30,7 @@ public class ArrayMaths {
 		return x;
 	}
 
-	private static int max(double[] samples) {
+	static int Max(double[] samples) {
 		int max=0;
 		for(int i =0; i<samples.length; i++) {
 			if((int)samples[i] > max) max = (int) samples[i]; 
@@ -72,6 +72,52 @@ public class ArrayMaths {
 	static double[] multiply(double[]x, double d) {
 		for(int i = 0; i < x.length; i++) x[i] = x[i] * d;
 		return x;
+	}
+
+	public static int Min(long[] histograma) {
+		// TODO Auto-generated method stub
+		int min=Integer.MAX_VALUE;
+		for(int i =0; i<histograma.length; i++) {
+			if((int)histograma[i] < min) min = (int) histograma[i]; 
+		}
+		return min;
+	}
+
+	public static int MaxWithValue(long[] histograma) {
+		int max=0;
+		for(int i =0; i<histograma.length; i++) {
+			if(histograma[i] != 0) max = i; 
+		}
+		return max;
+	}
+
+	public static int MinWithValue(long[] histograma) {
+		// TODO Auto-generated method stub
+		int min=0;
+		for(int i = histograma.length - 1; i >= 0; i--) {
+			if(histograma[i] != 0) min = i; 
+		}
+		return min;
+	}
+
+	public static int average(long[] histograma) {
+		// TODO Auto-generated method stub
+		long acum=0;
+		for(int i = 0; i < histograma.length; i++) {
+			acum += histograma[i]; 
+		}
+		return (int) (acum/histograma.length);
+	}
+
+	public static int lumAverage(long[] histograma) {
+		// TODO Auto-generated method stub
+		long lumAcum=0;
+		long acum = 0;
+		for(int i = 0; i < histograma.length; i++) {
+			lumAcum += histograma[i] * i;
+			acum += histograma[i]; 
+		}
+		return (int) (lumAcum/acum);
 	}
 
 }

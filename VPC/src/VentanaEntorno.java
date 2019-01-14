@@ -90,7 +90,9 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 					path = file.getAbsolutePath();
 					backEnd = new Entorno(file.getAbsolutePath());
 					datos.setText("Tipo:" + backEnd.getType() + " Bits:" + backEnd.getBits() + " " +  
-							backEnd.getImagen().getIconWidth() + "x" + backEnd.getImagen().getIconHeight());
+							backEnd.getImagen().getIconWidth() + "x" + backEnd.getImagen().getIconHeight() + 
+							" Min:" + backEnd.getMin() + " Max:" + backEnd.getMax() + 
+							" brillo:" + backEnd.getBrillo() + " Contraste:" + backEnd.getContraste());
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block
 					Aplicacion.logger.log(Level.WARNING, "No se pudo abrir la imagen", e1);
@@ -260,6 +262,10 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 		}
 		backEnd.updateIcon();
 		imagen.setIcon(backEnd.getImagen());
+		datos.setText("Tipo:" + backEnd.getType() + " Bits:" + backEnd.getBits() + " " +  
+				backEnd.getImagen().getIconWidth() + "x" + backEnd.getImagen().getIconHeight() + 
+				" Min:" + backEnd.getMin() + " Max:" + backEnd.getMax() + 
+				" brillo:" + backEnd.getBrillo() + " Contraste:" + backEnd.getContraste());
 		pack();
 	}
 
@@ -570,12 +576,16 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
         final int w = backEnd.getImagenBf().getWidth();
         final int h = backEnd.getImagenBf().getHeight();
         double[] r = new double[w * h +2];
+        double[] greenSamples = null;
+        double[] blueSamples = null;
         r = raster.getSamples(0, 0, w, h, 0, r);
         double[] redSamples = r.clone();
-        r = raster.getSamples(0, 0, w, h, 1, r);
-        double[] greenSamples = r.clone();
-        r = raster.getSamples(0, 0, w, h, 2, r);
-        double[] blueSamples = r.clone();
+        if(backEnd.getBits() != 8){
+        	r = raster.getSamples(0, 0, w, h, 1, r);
+        	greenSamples = r.clone();
+        	r = raster.getSamples(0, 0, w, h, 2, r);
+        	blueSamples = r.clone();
+        }
         if(!isAcumulativo) {
         	if(backEnd.getBits() == 8) {
         		r = raster.getSamples(0, 0, w, h, 0, r);
@@ -606,7 +616,7 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
     	        for (int i = 0; i < r.length; i++) {
 	        		auxDataset.setValue(r[i],"Red",Integer.toString(i));
 	        	}
-    	        r = ArrayMaths.toDouble(ArrayMaths.HistogramaAcumulativo(greenSamples));
+				r = ArrayMaths.toDouble(ArrayMaths.HistogramaAcumulativo(greenSamples));
     	        for (int i = 0; i < r.length; i++) {
 	        		auxDataset.setValue(r[i],"Green",Integer.toString(i));
 	        	}
