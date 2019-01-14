@@ -1,13 +1,17 @@
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Paint;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
+import java.awt.geom.AffineTransform;
+import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
+import java.awt.image.ImageObserver;
 import java.awt.image.Raster;
 import java.io.File;
 import java.io.IOException;
@@ -37,7 +41,7 @@ import org.jfree.data.general.Dataset;
 import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.IntervalXYDataset;
 
-public class Entorno  {
+public class Entorno implements ImageObserver  {
 	
 	private ImageIcon imagen;
 	private BufferedImage imagenBf;
@@ -49,6 +53,7 @@ public class Entorno  {
 	private Linea seleccion;
 	//private JTextField valor;
 	//private JButton aceptar;
+	private int prevrot;
 
 	public Entorno(String absolutePath) throws IOException {
 		direccion = absolutePath;
@@ -554,6 +559,7 @@ public class Entorno  {
 				imagenBf.setRGB(i, j, color.getRGB());
 			}
 		}
+		bits = 8;
 		updateIcon();
 	}
 	
@@ -762,6 +768,31 @@ public class Entorno  {
 		buffered.getGraphics().drawImage(image, 0, 0 , null);
 		imagenBf = buffered;
 		updateIcon();
+	}
+	
+	public void rotate(int grados){
+		double radians = (prevrot + grados) * Math.PI / 180;
+		prevrot+=grados;
+		int nw = Math.abs((int)Math.floor( (Math.cos(radians) * imagenBf.getWidth() + Math.sin(radians) * imagenBf.getHeight())));
+		int nh = Math.abs((int)Math.floor(Math.cos(radians) * imagenBf.getHeight() + Math.sin(radians) * imagenBf.getWidth()));
+		BufferedImage buffered = new BufferedImage(nw, nh, Image.SCALE_SMOOTH);
+		Graphics2D g2d = buffered.createGraphics();
+		AffineTransform transform = new AffineTransform();
+		transform.translate((nw - imagenBf.getWidth())/2, (nh - imagenBf.getHeight())/2);
+	    transform.rotate(radians, imagenBf.getWidth()/2, imagenBf.getHeight()/2);
+	    g2d.setTransform(transform);
+	    g2d.drawImage(imagenBf, 0, 0, this);
+        g2d.dispose();
+	    //transform.rotate(radians, imagenBf.getWidth()/2, imagenBf.getHeight()/2);
+	    //AffineTransformOp op = new AffineTransformOp(transform, AffineTransformOp.TYPE_BILINEAR);
+	    //imagenBf = op.filter(imagenBf, null);
+        imagen = new ImageIcon(buffered);
+	}
+
+	@Override
+	public boolean imageUpdate(Image img, int infoflags, int x, int y, int width, int height) {
+		// TODO Auto-generated method stub
+		return true;
 	}
 
 	public int getMax() {
