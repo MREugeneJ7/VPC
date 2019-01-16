@@ -64,7 +64,7 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 	private JLabel imagen, datos, posRaton;
 	private JComboBox transformacionesLineales, transformacionesNoLineales, operacionesHistograma, rotaciones;
 	private JCheckBox red, green, blue;
-	private JTextField valor, valor1, alfa[], beta[], min[], max[];
+	private JTextField valor, valor1, newMin[], newMax[], min[], max[];
 	private final JFileChooser fc = new JFileChooser();
 	private int j = 0;
 	ButtonGroup metodos;
@@ -163,17 +163,17 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 			float contraste = Float.parseFloat(valor.getText());
 			backEnd.cambiarContraste(contraste);
 		} else if (e.getSource() == aceptar2){
-			int brillo[] = new int[alfa.length];
-			float contraste[] = new float[alfa.length];
-			int min[] = new int[alfa.length];
-			int max[] = new int[alfa.length];
-			for(int i = 0; i < alfa.length; i++){
-				brillo[i] = Integer.parseInt(alfa[i].getText());
-				contraste[i] = Float.parseFloat(beta[i].getText());
+			int newMin[] = new int[this.newMin.length];
+			int newMax[] = new int[this.newMin.length];
+			int min[] = new int[newMin.length];
+			int max[] = new int[newMin.length];
+			for(int i = 0; i < newMin.length; i++){
+				newMin[i] = Integer.parseInt(this.newMin[i].getText());
+				newMax[i] = Integer.parseInt(this.newMax[i].getText());
 				min[i] = Integer.parseInt(this.min[i].getText());
 				max[i] = Integer.parseInt(this.max[i].getText());
 			}
-			backEnd.tranLinPT(brillo,contraste,min,max);
+			backEnd.tranLinPT(newMin,newMax,min,max);
 		}else if(e.getSource()==aceptar3){
 			double gamma = Double.parseDouble(valor.getText());
 			backEnd.gamma(gamma);
@@ -517,42 +517,71 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 		panelContenido.setLayout(layout);
 		layout.setAutoCreateGaps(true);
 		layout.setAutoCreateContainerGaps(true);
-		alfa = new JTextField[cantidad];
-		beta = new JTextField[cantidad];
+		newMin = new JTextField[cantidad];
+		newMax = new JTextField[cantidad];
 		min = new JTextField[cantidad];
 		max = new JTextField[cantidad];
 		for (int i = 0; i < cantidad; i++){
-			alfa[i] = new JTextField(10);
-			beta[i] = new JTextField(10);
+			newMin[i] = new JTextField(10);
+			newMax[i] = new JTextField(10);
 			min[i] = new JTextField(10);
 			max[i] = new JTextField(10);
 		}
 		
-		JLabel v1 = new JLabel("V1:");
-		JLabel v0 = new JLabel(" + V0* ");
+		JLabel newMinL = new JLabel("Nuevo minimo");
+		JLabel newMaxL = new JLabel("nuevo maximo");
+		JLabel minL = new JLabel("minimo");
+		JLabel maxL = new JLabel("maximo");
 		aceptar2 = new JButton("Aceptar");
 		
 		aceptar2.addActionListener(this);
 		
 		ParallelGroup grupoHorizontal = layout.createParallelGroup(GroupLayout.Alignment.LEADING);
 		SequentialGroup grupoSecuencial = layout.createSequentialGroup();
-		
-		for (int i = 0; i < cantidad; i++){
+		grupoHorizontal.addGroup(layout.createSequentialGroup()	
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+						.addComponent(newMinL)
+						.addComponent(newMin[0])
+						)
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+						.addComponent(newMaxL)
+						.addComponent(newMax[0])
+						)
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+						.addComponent(minL)
+						.addComponent(min[0])
+						)
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+						.addComponent(maxL)
+						.addComponent(max[0])
+						)
+					);
+		grupoSecuencial.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+				.addGroup(layout.createSequentialGroup()
+						.addComponent(newMinL)
+						.addComponent(newMin[0]))
+				.addGroup(layout.createSequentialGroup()
+						.addComponent(newMaxL)
+						.addComponent(newMax[0]))
+				.addGroup(layout.createSequentialGroup()
+						.addComponent(minL)
+						.addComponent(min[0]))
+				.addGroup(layout.createSequentialGroup()
+						.addComponent(maxL)
+						.addComponent(max[0]))
+			);
+		for (int i = 1; i < cantidad; i++){
 			grupoHorizontal.addGroup(layout.createSequentialGroup()
-							.addComponent(v1)
-							.addComponent(alfa[i])
-							.addComponent(v0)
-							.addComponent(beta[i])
+							.addComponent(newMin[i])
+							.addComponent(newMax[i])
 							.addComponent(min[i])
 							.addComponent(max[i])
 					);
 		}
-		for (int i = 0; i < cantidad; i++){
+		for (int i = 1; i < cantidad; i++){
 			grupoSecuencial.addGroup((layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-				.addComponent(v1)
-				.addComponent(alfa[i])
-				.addComponent(v0)
-				.addComponent(beta[i])
+				.addComponent(newMin[i])
+				.addComponent(newMax[i])
 				.addComponent(min[i])
 				.addComponent(max[i])
 				)
@@ -583,6 +612,7 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 		panelContenido.setLayout(layout);
 		layout.setAutoCreateGaps(true);
 		layout.setAutoCreateContainerGaps(true);
+		JLabel contrasteActual = new JLabel(backEnd.getContraste() + " * ");
 		valor = new JTextField(10);
 		aceptar1 = new JButton("Aceptar");
 		
@@ -591,6 +621,7 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 		layout.setHorizontalGroup(
 				layout.createParallelGroup(GroupLayout.Alignment.LEADING)
 				.addGroup(layout.createSequentialGroup()
+						.addComponent(contrasteActual)
 						.addComponent(valor)
 						.addComponent(aceptar1)
 						)
@@ -598,6 +629,7 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 		layout.setVerticalGroup(
 				layout.createSequentialGroup()
 				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+						.addComponent(contrasteActual)
 						.addComponent(valor)
 						.addComponent(aceptar1)
 						)
@@ -717,6 +749,7 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 		panelContenido.setLayout(layout);
 		layout.setAutoCreateGaps(true);
 		layout.setAutoCreateContainerGaps(true);
+		JLabel brilloActual = new JLabel(backEnd.getBrillo() + " + ");
 		valor = new JTextField(10);
 		aceptar = new JButton("Aceptar");
 		
@@ -725,6 +758,7 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 		layout.setHorizontalGroup(
 				layout.createParallelGroup(GroupLayout.Alignment.LEADING)
 				.addGroup(layout.createSequentialGroup()
+						.addComponent(brilloActual)
 						.addComponent(valor)
 						.addComponent(aceptar)
 						)
@@ -732,6 +766,7 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 		layout.setVerticalGroup(
 				layout.createSequentialGroup()
 				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+						.addComponent(brilloActual)
 						.addComponent(valor)
 						.addComponent(aceptar)
 						)
@@ -895,7 +930,8 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 	}
 	
 	public void mouseMoved(MouseEvent e){
-		posRaton.setText("| X:" + e.getX() + " Y:" + e.getY());
+		Color c = new Color(backEnd.getImagenBf().getRGB(e.getX(), e.getY()));
+		posRaton.setText("| X:" + e.getX() + " Y:" + e.getY() + " R:" + c.getRed() + " G:" + c.getGreen() + " B:" + c.getBlue());
 	}
 
 	@Override

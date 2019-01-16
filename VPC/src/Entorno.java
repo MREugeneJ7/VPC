@@ -271,6 +271,7 @@ public class Entorno implements ImageObserver  {
 
 	public void cambiarContraste(float contraste) {
 		// TODO Auto-generated method stub
+		int brilloAntiguo = new Integer(brillo);
 		for(int i = 0; i < imagenBf.getWidth();i++) {
 			for(int j =0; j < imagenBf.getHeight();j++) {
 				Color color = new Color(imagenBf.getRGB(i, j));
@@ -290,6 +291,8 @@ public class Entorno implements ImageObserver  {
 				imagenBf.setRGB(i, j, color.getRGB());
 			}
 		}
+		int diferencia = brilloAntiguo - getBrillo();
+		cambiarBrillo(diferencia);
 		updateIcon();
 	}
 
@@ -633,6 +636,7 @@ public class Entorno implements ImageObserver  {
 
 	private void cambiarContrasteCondicionado(float contraste, int j, int k) {
 		// TODO Auto-generated method stub
+		int brilloAntiguo = new Integer(brillo);
 		for(int i = 0; i < imagenBf.getWidth();i++) {
 			for(int h =0; h < imagenBf.getHeight();h++) {
 				Color color = new Color(imagenBf.getRGB(i, h));
@@ -652,6 +656,8 @@ public class Entorno implements ImageObserver  {
 				imagenBf.setRGB(i, h, color.getRGB());
 			}
 		}
+		int diferencia = brilloAntiguo - getBrillo();
+		cambiarBrillo(diferencia);
 		updateIcon();
 		
 	}
@@ -797,26 +803,38 @@ public class Entorno implements ImageObserver  {
 
 	public int getMax() {
 		// TODO Auto-generated method stub
-		calcMax();
+		maxLum = calcMax();
 		return maxLum;
 	}
 
 	public int getMin() {
 		// TODO Auto-generated method stub
-		calcMin();
+		minLum = calcMin();
 		return minLum;
 	}
 
 	public int getBrillo() {
 		// TODO Auto-generated method stub
-		calcBrillo();
+		brillo = calcBrillo();
 		return brillo;
 	}
 
 	public double getContraste() {
 		// TODO Auto-generated method stub
-		calcContrast();
+		contrast = calcContrast();
 		return contrast;
+	}
+
+	public void tranLinPT(int[] newMin, int[] newMax, int[] min, int[] max) {
+		// TODO Auto-generated method stub
+		for(int i = 0; i < newMin.length; i++){
+			int dif = newMin[i] - min[i];
+			System.out.println(dif);
+			cambiarBrilloCondicionado(dif, min[i], max[i]);
+			float contraste =  (float)newMax[i] / (float)(max[i] + dif);
+			System.out.println(contraste);
+			cambiarContrasteCondicionado(contraste, min[i], max[i] );
+		}
 	}
 
 }
