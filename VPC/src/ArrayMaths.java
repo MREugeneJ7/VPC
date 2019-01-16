@@ -10,7 +10,7 @@ public class ArrayMaths {
 	public static long[] Histograma(double[] samples) {
 		// TODO Auto-generated method stub
 		long intensidad[];
-		intensidad = new long[Max(samples)+1];
+		intensidad = new long[256];
 		intensidad = put(0 , intensidad );
 		//System.out.println(samples.length);
 		for(int k = 0; k < samples.length; k++ ) {
@@ -84,7 +84,7 @@ public class ArrayMaths {
 	}
 
 	public static int MaxWithValue(long[] histograma) {
-		int max=0;
+		int max = 0;
 		for(int i =0; i<histograma.length; i++) {
 			if(histograma[i] != 0) max = i; 
 		}
@@ -93,9 +93,10 @@ public class ArrayMaths {
 
 	public static int MinWithValue(long[] histograma) {
 		// TODO Auto-generated method stub
-		int min=0;
+		int min = 0;
 		for(int i = histograma.length - 1; i >= 0; i--) {
-			if(histograma[i] != 0) min = i; 
+			//System.out.println(i + " " +histograma[i]);
+			if(histograma[i] != 0 && (i != 0 || histograma[i] != 1)) min = i;
 		}
 		return min;
 	}

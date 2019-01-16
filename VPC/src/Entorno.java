@@ -71,6 +71,7 @@ public class Entorno implements ImageObserver  {
 
 	private double calcContrast() {
 		// TODO Auto-generated method stub
+		if (brillo == 0) return 1;
 		return (maxLum - minLum) / brillo;
 	}
 
@@ -636,7 +637,6 @@ public class Entorno implements ImageObserver  {
 
 	private void cambiarContrasteCondicionado(float contraste, int j, int k) {
 		// TODO Auto-generated method stub
-		int brilloAntiguo = new Integer(brillo);
 		for(int i = 0; i < imagenBf.getWidth();i++) {
 			for(int h =0; h < imagenBf.getHeight();h++) {
 				Color color = new Color(imagenBf.getRGB(i, h));
@@ -656,8 +656,6 @@ public class Entorno implements ImageObserver  {
 				imagenBf.setRGB(i, h, color.getRGB());
 			}
 		}
-		int diferencia = brilloAntiguo - getBrillo();
-		cambiarBrillo(diferencia);
 		updateIcon();
 		
 	}
@@ -829,11 +827,11 @@ public class Entorno implements ImageObserver  {
 		// TODO Auto-generated method stub
 		for(int i = 0; i < newMin.length; i++){
 			int dif = newMin[i] - min[i];
-			System.out.println(dif);
-			cambiarBrilloCondicionado(dif, min[i], max[i]);
-			float contraste =  (float)newMax[i] / (float)(max[i] + dif);
-			System.out.println(contraste);
+			//System.out.println(dif);
+			float contraste =  (float)newMax[i] / (float)(max[i] - dif);
+			//System.out.println(contraste);
 			cambiarContrasteCondicionado(contraste, min[i], max[i] );
+			cambiarBrilloCondicionado(dif, min[i], max[i]);
 		}
 	}
 

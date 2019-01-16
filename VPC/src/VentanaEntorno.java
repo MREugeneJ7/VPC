@@ -930,8 +930,8 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 	}
 	
 	public void mouseMoved(MouseEvent e){
-		Color c = new Color(backEnd.getImagenBf().getRGB(e.getX(), e.getY()));
-		posRaton.setText("| X:" + e.getX() + " Y:" + e.getY() + " R:" + c.getRed() + " G:" + c.getGreen() + " B:" + c.getBlue());
+		//Color c = new Color(backEnd.getImagenBf().getRGB(e.getX(), e.getY()));
+		//posRaton.setText("| X:" + e.getX() + " Y:" + e.getY() + " R:" + c.getRed() + " G:" + c.getGreen() + " B:" + c.getBlue());
 	}
 
 	@Override
