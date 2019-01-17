@@ -10,7 +10,9 @@ public class ArrayMaths {
 	public static long[] Histograma(double[] samples) {
 		// TODO Auto-generated method stub
 		long intensidad[];
-		intensidad = new long[256];
+		int lenght = ArrayMaths.Max(samples)+1;
+		if (lenght < 256) lenght = 256;
+		intensidad = new long[lenght];
 		intensidad = put(0 , intensidad );
 		//System.out.println(samples.length);
 		for(int k = 0; k < samples.length; k++ ) {

@@ -44,9 +44,9 @@ import org.jfree.data.xy.IntervalXYDataset;
 public class Entorno implements ImageObserver  {
 	
 	private ImageIcon imagen;
-	private BufferedImage imagenBf;
+	private BufferedImage[] imagenBf;
 	private String direccion,tipoImagen;
-	private int bits, color, maxLum, minLum, brillo;
+	private int bits, color, maxLum, minLum, brillo, currentImage;
 	private double contrast;
 	private HistogramDataset histogramDataset;
 	private DefaultCategoryDataset acumDataset;
@@ -59,9 +59,12 @@ public class Entorno implements ImageObserver  {
 		direccion = absolutePath;
 		imagen = new ImageIcon(absolutePath);
 		tipoImagen = direccion.substring(direccion.lastIndexOf('.') + 1);
-		imagenBf = ImageIO.read(new File(direccion));
-		bits = imagenBf.getColorModel().getPixelSize();
-		seleccion = new Linea(imagenBf.getHeight()*imagenBf.getWidth());
+		imagenBf = new BufferedImage[10];
+		for(int i = 0 ; i < 10; i++) imagenBf[i] = ImageIO.read(new File(direccion));
+		currentImage = 9;
+		bits = imagenBf[currentImage].getColorModel().getPixelSize();
+		
+		seleccion = new Linea(imagenBf[currentImage].getHeight()*imagenBf[currentImage].getWidth());
 		minLum = calcMin();
 		maxLum = calcMax();
 		brillo = calcBrillo();
@@ -78,9 +81,9 @@ public class Entorno implements ImageObserver  {
 	private int calcBrillo() {
 		// TODO Auto-generated method stub
 		long[] histograma = new long[256];
-		final int w = imagenBf.getWidth();
-        final int h = imagenBf.getHeight();
-        Raster raster = imagenBf.getRaster();
+		final int w = imagenBf[currentImage].getWidth();
+        final int h = imagenBf[currentImage].getHeight();
+        Raster raster = imagenBf[currentImage].getRaster();
         double[] r = new double[w * h +1];
         r = raster.getSamples(0, 0, w, h, 0, r);
         double[] greenSamples = null;
@@ -107,9 +110,9 @@ public class Entorno implements ImageObserver  {
 	private int calcMax() {
 		// TODO Auto-generated method stub
 		long[] histograma = new long[256];
-		final int w = imagenBf.getWidth();
-        final int h = imagenBf.getHeight();
-        Raster raster = imagenBf.getRaster();
+		final int w = imagenBf[currentImage].getWidth();
+        final int h = imagenBf[currentImage].getHeight();
+        Raster raster = imagenBf[currentImage].getRaster();
         double[] r = new double[w * h +1];
         r = raster.getSamples(0, 0, w, h, 0, r);
         double[] greenSamples = null;
@@ -136,9 +139,9 @@ public class Entorno implements ImageObserver  {
 	private int calcMin() {
 		// TODO Auto-generated method stub
 		long[] histograma = new long[256];
-		final int w = imagenBf.getWidth();
-        final int h = imagenBf.getHeight();
-        Raster raster = imagenBf.getRaster();
+		final int w = imagenBf[currentImage].getWidth();
+        final int h = imagenBf[currentImage].getHeight();
+        Raster raster = imagenBf[currentImage].getRaster();
         double[] r = new double[w * h +1];
         r = raster.getSamples(0, 0, w, h, 0, r);
         double[] greenSamples = null;
@@ -192,13 +195,13 @@ public class Entorno implements ImageObserver  {
 
 	public void borrarSeleccion() {
 		// TODO Auto-generated method stub
-		seleccion = new Linea(imagenBf.getHeight()*imagenBf.getWidth());
+		seleccion = new Linea(imagenBf[currentImage].getHeight()*imagenBf[currentImage].getWidth());
 		
 	}
 
 	public void mostrarSeleccion() throws IOException {
 		// TODO Auto-generated method stub
-		imagen = new ImageIcon(imagenBf);
+		imagen = new ImageIcon(imagenBf[currentImage]);
 		BufferedImage imgaux = ImageIO.read(new File(direccion));
 		for(int i=0; i< seleccion.getLastIndex();i++) {
 			Coordenada aux = seleccion.getCoordenada(i);
@@ -214,21 +217,22 @@ public class Entorno implements ImageObserver  {
 
 	public void psicoldelia() {
 		// TODO Auto-generated method stub
-		for(int i = 0; i < imagenBf.getWidth();i++) {
-			for(int j =0; j < imagenBf.getHeight();j++) {
-				color = (-1)*imagenBf.getRGB(i,j);
+		for(int i = 0; i < imagenBf[currentImage].getWidth();i++) {
+			for(int j =0; j < imagenBf[currentImage].getHeight();j++) {
+				color = (-1)*imagenBf[currentImage].getRGB(i,j);
 				if(color >  256 * 256 + 256 ){
-					color = imagenBf.getRGB(i, j);
+					color = imagenBf[currentImage].getRGB(i, j);
 				} else {
 					color = (int)((int) (Math.random()*256) * 256 * 256 +
 							(int) (Math.random()*256) * 256 + 
 							(int) (Math.random()*256))/2 +
-							((int)imagenBf.getRGB(i, j)/2);
+							((int)imagenBf[currentImage].getRGB(i, j)/2);
 				}
 				
-				imagenBf.setRGB(i, j, color);
+				imagenBf[currentImage].setRGB(i, j, color);
 			}
 		}
+		notifyChange();
 		updateIcon();
 	}
 
@@ -237,9 +241,9 @@ public class Entorno implements ImageObserver  {
 	
 	public void cambiarBrillo(int brillo) {
 		// TODO Auto-generated method stub
-		for(int i = 0; i < imagenBf.getWidth();i++) {
-			for(int j =0; j < imagenBf.getHeight();j++) {
-				Color color = new Color(imagenBf.getRGB(i, j));
+		for(int i = 0; i < imagenBf[currentImage].getWidth();i++) {
+			for(int j =0; j < imagenBf[currentImage].getHeight();j++) {
+				Color color = new Color(imagenBf[currentImage].getRGB(i, j));
 				int red = color.getRed();
 				int blue = color.getBlue();
 				int green = color.getGreen();
@@ -253,15 +257,16 @@ public class Entorno implements ImageObserver  {
 				if(green < 0) green = 0;
 				if(green > 255) green = 255;
 				color = new Color(red, green, blue);
-				imagenBf.setRGB(i, j, color.getRGB());
+				imagenBf[currentImage].setRGB(i, j, color.getRGB());
 			}
 		}
+		notifyChange();
 		updateIcon();
 	}
 
 	public BufferedImage getImagenBf() {
 		// TODO Auto-generated method stub
-		return imagenBf;
+		return imagenBf[currentImage];
 	}
 
 	public void setDataset(DefaultCategoryDataset auxDataset) {
@@ -273,9 +278,9 @@ public class Entorno implements ImageObserver  {
 	public void cambiarContraste(float contraste) {
 		// TODO Auto-generated method stub
 		int brilloAntiguo = new Integer(brillo);
-		for(int i = 0; i < imagenBf.getWidth();i++) {
-			for(int j =0; j < imagenBf.getHeight();j++) {
-				Color color = new Color(imagenBf.getRGB(i, j));
+		for(int i = 0; i < imagenBf[currentImage].getWidth();i++) {
+			for(int j =0; j < imagenBf[currentImage].getHeight();j++) {
+				Color color = new Color(imagenBf[currentImage].getRGB(i, j));
 				int red = color.getRed();
 				int blue = color.getBlue();
 				int green = color.getGreen();
@@ -289,19 +294,20 @@ public class Entorno implements ImageObserver  {
 				if(green < 0) green = 0;
 				if(green > 255) green = 255;
 				color = new Color(red, green, blue);
-				imagenBf.setRGB(i, j, color.getRGB());
+				imagenBf[currentImage].setRGB(i, j, color.getRGB());
 			}
 		}
 		int diferencia = brilloAntiguo - getBrillo();
 		cambiarBrillo(diferencia);
+		notifyChange();
 		updateIcon();
 	}
 
 	public void gamma(double gamma) {
 		// TODO Auto-generated method stub
-		for(int i = 0; i < imagenBf.getWidth();i++) {
-			for(int j =0; j < imagenBf.getHeight();j++) {
-				Color color = new Color(imagenBf.getRGB(i, j));
+		for(int i = 0; i < imagenBf[currentImage].getWidth();i++) {
+			for(int j =0; j < imagenBf[currentImage].getHeight();j++) {
+				Color color = new Color(imagenBf[currentImage].getRGB(i, j));
 				int red = color.getRed();
 
 				int blue = color.getBlue();
@@ -316,19 +322,20 @@ public class Entorno implements ImageObserver  {
 				if(green < 0) green = 0;
 				if(green > 255) green = 255;
 				color = new Color(red, green, blue);
-				imagenBf.setRGB(i, j, color.getRGB());
+				imagenBf[currentImage].setRGB(i, j, color.getRGB());
 			}
 		}
+		notifyChange();
 		updateIcon();
 	}
 
 	public void ecualizar() {
 		long[][] histograma = new long[3][256];
 		if (bits == 8) histograma = new long[1][256];
-		final int w = imagenBf.getWidth();
-        final int h = imagenBf.getHeight();
+		final int w = imagenBf[currentImage].getWidth();
+        final int h = imagenBf[currentImage].getHeight();
         final int average = (w*h)/255;
-        Raster raster = imagenBf.getRaster();
+        Raster raster = imagenBf[currentImage].getRaster();
         double[] r = new double[w * h +1];
 	    histograma[0] = ArrayMaths.Histograma(raster.getSamples(0, 0, w, h, 0, r));
 	    if(bits != 8) {
@@ -341,7 +348,7 @@ public class Entorno implements ImageObserver  {
 	    		long diff = histograma[i][j] - (long)average;
 	    		int x = 0, y = 0;
 	    		while((diff != 0) && (y < h)) {
-	    			Color rgb = new Color(imagenBf.getRGB(x, y));
+	    			Color rgb = new Color(imagenBf[currentImage].getRGB(x, y));
 	    			int aux = 0;
 	    			switch (i) {
 	    			case 0:
@@ -351,13 +358,13 @@ public class Entorno implements ImageObserver  {
 			    				rgb = new Color(j , j, j );
 			    				diff++;
 			    				histograma[i][aux]--;
-			    				imagenBf.setRGB(x, y, rgb.getRGB());
+			    				imagenBf[currentImage].setRGB(x, y, rgb.getRGB());
 			    			}else if((diff > 0) && (aux == j)) {
-			    				int random = (int)(Math.random() * (histograma[i].length - j)) + j;
+			    				int random = j + 1;
 			    				rgb = new Color(random , random, random );
 			    				diff--;
 			    				histograma[i][random]++;
-			    				imagenBf.setRGB(x, y, rgb.getRGB());
+			    				imagenBf[currentImage].setRGB(x, y, rgb.getRGB());
 			    			}
 	    				}
 	    				else {
@@ -366,13 +373,13 @@ public class Entorno implements ImageObserver  {
 			    				rgb = new Color(j , rgb.getGreen(), rgb.getBlue() );
 			    				diff++;
 			    				histograma[i][aux]--;
-			    				imagenBf.setRGB(x, y, rgb.getRGB());
+			    				imagenBf[currentImage].setRGB(x, y, rgb.getRGB());
 			    			}else if((diff > 0) && (aux == j)) {
-			    				int random = (int)(Math.random() * (histograma[i].length - j)) + j;
+			    				int random = 1 + j;
 			    				rgb = new Color(random , rgb.getGreen(), rgb.getBlue() );
 			    				diff--;
 			    				histograma[i][random]++;
-			    				imagenBf.setRGB(x, y, rgb.getRGB());
+			    				imagenBf[currentImage].setRGB(x, y, rgb.getRGB());
 			    			}
 	    				}
 	    			case 1:
@@ -381,13 +388,13 @@ public class Entorno implements ImageObserver  {
 		    				rgb = new Color(rgb.getRed() , j, rgb.getBlue() );
 		    				diff++;
 		    				histograma[i][aux]--;
-		    				imagenBf.setRGB(x, y, rgb.getRGB());
+		    				imagenBf[currentImage].setRGB(x, y, rgb.getRGB());
 		    			}else if((diff > 0) && (aux == j)) {
 		    				int random = (int)(Math.random() * (histograma[i].length - j)) + j;
 		    				rgb = new Color(rgb.getRed() , random, rgb.getBlue() );
 		    				diff--;
 		    				histograma[i][random]++;
-		    				imagenBf.setRGB(x, y, rgb.getRGB());
+		    				imagenBf[currentImage].setRGB(x, y, rgb.getRGB());
 		    			}
 	    			case 2:
 	    				aux = rgb.getBlue();
@@ -395,13 +402,13 @@ public class Entorno implements ImageObserver  {
 		    				rgb = new Color(rgb.getRed() , rgb.getGreen(), j );
 		    				diff++;
 		    				if(aux < histograma[i].length && aux > 0) histograma[i][aux]--;
-		    				imagenBf.setRGB(x, y, rgb.getRGB());
+		    				imagenBf[currentImage].setRGB(x, y, rgb.getRGB());
 		    			}else if((diff > 0) && (aux == j)) {
-		    				int random = (int)(Math.random() * (histograma[i].length - j)) + j;
+		    				int random = 1 + j;
 		    				rgb = new Color(rgb.getRed() , rgb.getGreen(), random );
 		    				diff--;
 		    				histograma[i][random]++;
-		    				imagenBf.setRGB(x, y, rgb.getRGB());
+		    				imagenBf[currentImage].setRGB(x, y, rgb.getRGB());
 		    			}
 	    			}
 	    			x++;
@@ -411,6 +418,7 @@ public class Entorno implements ImageObserver  {
 	    			}
 	    		}
 	    	}
+	    notifyChange();
 	    updateIcon();
 	}
 
@@ -419,9 +427,9 @@ public class Entorno implements ImageObserver  {
 		int r, g, b;
 		BufferedImage imagenCalculo;
 		imagenCalculo = ImageIO.read(new File(path));
-		for(int i = 0; i < imagenBf.getWidth();i++) {
-			for(int j =0; j < imagenBf.getHeight();j++) {
-				Color color = new Color(imagenBf.getRGB(i, j));
+		for(int i = 0; i < imagenBf[currentImage].getWidth();i++) {
+			for(int j =0; j < imagenBf[currentImage].getHeight();j++) {
+				Color color = new Color(imagenBf[currentImage].getRGB(i, j));
 				Color color2 = new Color(0);
 				if((i >= imagenCalculo.getWidth()) || (j >= imagenCalculo.getHeight()))	color2 = color;
 				else color2 = new Color(imagenCalculo.getRGB(i, j));
@@ -435,9 +443,10 @@ public class Entorno implements ImageObserver  {
 				if(g < 0) g *= -1;
 				if(b < 0) b *= -1;
 				color = new Color(r,g,b);
-				imagenBf.setRGB(i, j, color.getRGB());
+				imagenBf[currentImage].setRGB(i, j, color.getRGB());
 			}
 		}
+		notifyChange();
 		updateIcon();
 	}
 
@@ -457,9 +466,9 @@ public class Entorno implements ImageObserver  {
 		}
 		
 		
-		final int w = imagenBf.getWidth();
-        final int h = imagenBf.getHeight();
-        Raster raster = imagenBf.getRaster();
+		final int w = imagenBf[currentImage].getWidth();
+        final int h = imagenBf[currentImage].getHeight();
+        Raster raster = imagenBf[currentImage].getRaster();
         Raster rasterObjetivo = imagenObjetivo.getRaster();
         double[] r = new double[w * h +1];
 	    histograma[0] = ArrayMaths.Histograma(raster.getSamples(0, 0, w, h, 0, r));
@@ -477,7 +486,7 @@ public class Entorno implements ImageObserver  {
 	    		if(j < histogramaObjetivo[i].length) diff = histograma[i][j] - histogramaObjetivo[i][j];
 	    		int x = 0, y = 0;
 	    		while((diff != 0) && (y < h)) {
-	    			Color rgb = new Color(imagenBf.getRGB(x, y));
+	    			Color rgb = new Color(imagenBf[currentImage].getRGB(x, y));
 	    			int aux = 0;
 	    			switch (i) {
 	    			case 0:	
@@ -487,13 +496,13 @@ public class Entorno implements ImageObserver  {
 			    				rgb = new Color(j , j, j );
 			    				diff++;
 			    				histograma[i][aux]--;
-			    				imagenBf.setRGB(x, y, rgb.getRGB());
+			    				imagenBf[currentImage].setRGB(x, y, rgb.getRGB());
 			    			}else if((diff > 0) && (aux == j)) {
 			    				int random = (int)(Math.random() * (histograma[i].length - j)) + j;
 			    				rgb = new Color(random , random, random );
 			    				diff--;
 			    				histograma[i][random]++;
-			    				imagenBf.setRGB(x, y, rgb.getRGB());
+			    				imagenBf[currentImage].setRGB(x, y, rgb.getRGB());
 			    			}
 	    				}
 	    				else {
@@ -502,13 +511,13 @@ public class Entorno implements ImageObserver  {
 			    				rgb = new Color(j , rgb.getGreen(), rgb.getBlue() );
 			    				diff++;
 			    				histograma[i][aux]--;
-			    				imagenBf.setRGB(x, y, rgb.getRGB());
+			    				imagenBf[currentImage].setRGB(x, y, rgb.getRGB());
 			    			}else if((diff > 0) && (aux == j)) {
 			    				int random = (int)(Math.random() * (histograma[i].length - j)) + j;
 			    				rgb = new Color(random , rgb.getGreen(), rgb.getBlue() );
 			    				diff--;
 			    				histograma[i][random]++;
-			    				imagenBf.setRGB(x, y, rgb.getRGB());
+			    				imagenBf[currentImage].setRGB(x, y, rgb.getRGB());
 			    			}
 	    				}
 	    			case 1:
@@ -517,13 +526,13 @@ public class Entorno implements ImageObserver  {
 		    				rgb = new Color(rgb.getRed() , j, rgb.getBlue() );
 		    				diff++;
 		    				if(aux < histograma[i].length && aux > 0)  histograma[i][aux]--;
-		    				imagenBf.setRGB(x, y, rgb.getRGB());
+		    				imagenBf[currentImage].setRGB(x, y, rgb.getRGB());
 		    			}else if((diff > 0) && (aux == j)) {
 		    				int random = (int)(Math.random() * (histograma[i].length - j)) + j;
 		    				rgb = new Color(rgb.getRed() , random, rgb.getBlue() );
 		    				diff--;
 		    				histograma[i][random]++;
-		    				imagenBf.setRGB(x, y, rgb.getRGB());
+		    				imagenBf[currentImage].setRGB(x, y, rgb.getRGB());
 		    			}
 	    			case 2:
 	    				aux = rgb.getBlue();
@@ -531,13 +540,13 @@ public class Entorno implements ImageObserver  {
 		    				rgb = new Color(rgb.getRed() , rgb.getGreen(), j );
 		    				diff++;
 		    				if(aux < histograma[i].length && aux > 0) histograma[i][aux]--;
-		    				imagenBf.setRGB(x, y, rgb.getRGB());
+		    				imagenBf[currentImage].setRGB(x, y, rgb.getRGB());
 		    			}else if((diff > 0) && (aux == j)) {
 		    				int random = (int)(Math.random() * (histograma[i].length - j)) + j;
 		    				rgb = new Color(rgb.getRed() , rgb.getGreen(), random );
 		    				diff--;
 		    				histograma[i][random]++;
-		    				imagenBf.setRGB(x, y, rgb.getRGB());
+		    				imagenBf[currentImage].setRGB(x, y, rgb.getRGB());
 		    			}
 	    			}
 	    			x++;
@@ -547,23 +556,25 @@ public class Entorno implements ImageObserver  {
 	    			}
 	    		}
 	    	}
+	    notifyChange();
 	    updateIcon();
 	}
 
 	public void grayScale() {
 		// TODO Auto-generated method stub
-		for(int i = 0; i < imagenBf.getWidth();i++) {
-			for(int j =0; j < imagenBf.getHeight();j++) {
-				Color color = new Color(imagenBf.getRGB(i, j));
+		for(int i = 0; i < imagenBf[currentImage].getWidth();i++) {
+			for(int j =0; j < imagenBf[currentImage].getHeight();j++) {
+				Color color = new Color(imagenBf[currentImage].getRGB(i, j));
 				int red = color.getRed();
 				int blue = color.getBlue();
 				int green = color.getGreen();
 				int gray = (red+blue+green)/3;
 				color = new Color(gray, gray, gray);
-				imagenBf.setRGB(i, j, color.getRGB());
+				imagenBf[currentImage].setRGB(i, j, color.getRGB());
 			}
 		}
 		bits = 8;
+		notifyChange();
 		updateIcon();
 	}
 	
@@ -572,39 +583,41 @@ public class Entorno implements ImageObserver  {
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		int height = (int)screenSize.getHeight() - 200;
 		int width = (int)screenSize.getWidth() - 200;
-		if(imagenBf.getHeight() > height) {
-			factor = (double)height / imagenBf.getHeight();
-			width = (int)( imagenBf.getWidth() * factor);
+		if(imagenBf[currentImage].getHeight() > height) {
+			factor = (double)height / imagenBf[currentImage].getHeight();
+			width = (int)( imagenBf[currentImage].getWidth() * factor);
 		}
-		if(imagenBf.getWidth() > width) {
-			factor = (double)width / imagenBf.getWidth();
-			height = (int)( imagenBf.getHeight() * factor);
+		if(imagenBf[currentImage].getWidth() > width) {
+			factor = (double)width / imagenBf[currentImage].getWidth();
+			height = (int)( imagenBf[currentImage].getHeight() * factor);
 		}
 		
-		imagen = new ImageIcon(imagenBf);
+		imagen = new ImageIcon(imagenBf[currentImage]);
 		Image resize = imagen.getImage().getScaledInstance(width, height, java.awt.Image.SCALE_SMOOTH);
 		imagen = new ImageIcon(resize);
+
 	}
 
 	public void negative() {
 		// TODO Auto-generated method stub
-		for(int i = 0; i < imagenBf.getWidth();i++) {
-			for(int j =0; j < imagenBf.getHeight();j++) {
-				Color color = new Color(imagenBf.getRGB(i, j));
+		for(int i = 0; i < imagenBf[currentImage].getWidth();i++) {
+			for(int j =0; j < imagenBf[currentImage].getHeight();j++) {
+				Color color = new Color(imagenBf[currentImage].getRGB(i, j));
 				int red = color.getRed();
 				int blue = color.getBlue();
 				int green = color.getGreen();
 				color = new Color(255- red, 255 - green, 255 - blue);
-				imagenBf.setRGB(i, j, color.getRGB());
+				imagenBf[currentImage].setRGB(i, j, color.getRGB());
 			}
 		}
+		notifyChange();
 		updateIcon();
 	}
 
 	public void daltonismo(int selector) {
-		for(int i = 0; i < imagenBf.getWidth();i++) {
-			for(int j =0; j < imagenBf.getHeight();j++) {
-				Color color = new Color(imagenBf.getRGB(i, j));
+		for(int i = 0; i < imagenBf[currentImage].getWidth();i++) {
+			for(int j =0; j < imagenBf[currentImage].getHeight();j++) {
+				Color color = new Color(imagenBf[currentImage].getRGB(i, j));
 				int red = color.getRed();
 				int blue = color.getBlue();
 				int green = color.getGreen();
@@ -620,11 +633,11 @@ public class Entorno implements ImageObserver  {
 						break;
 				}
 				color = new Color(red, green, blue);
-				imagenBf.setRGB(i, j, color.getRGB());
+				imagenBf[currentImage].setRGB(i, j, color.getRGB());
 			}
 		}
-		updateIcon();
-		
+		notifyChange();
+		updateIcon();		
 	}
 
 	public void tranLinPT(int[] brillo, float[] contraste, int[] min, int[] max) {
@@ -637,9 +650,9 @@ public class Entorno implements ImageObserver  {
 
 	private void cambiarContrasteCondicionado(float contraste, int j, int k) {
 		// TODO Auto-generated method stub
-		for(int i = 0; i < imagenBf.getWidth();i++) {
-			for(int h =0; h < imagenBf.getHeight();h++) {
-				Color color = new Color(imagenBf.getRGB(i, h));
+		for(int i = 0; i < imagenBf[currentImage].getWidth();i++) {
+			for(int h =0; h < imagenBf[currentImage].getHeight();h++) {
+				Color color = new Color(imagenBf[currentImage].getRGB(i, h));
 				int red = color.getRed();
 				int blue = color.getBlue();
 				int green = color.getGreen();
@@ -653,18 +666,18 @@ public class Entorno implements ImageObserver  {
 				if(green < 0) green = 0;
 				if(green > 255) green = 255;
 				color = new Color(red, green, blue);
-				imagenBf.setRGB(i, h, color.getRGB());
+				imagenBf[currentImage].setRGB(i, h, color.getRGB());
 			}
 		}
-		updateIcon();
-		
+		notifyChange();
+		updateIcon();		
 	}
 
 	private void cambiarBrilloCondicionado(int brillo, int j, int k) {
 		// TODO Auto-generated method stub
-		for(int i = 0; i < imagenBf.getWidth();i++) {
-			for(int h =0; h < imagenBf.getHeight();h++) {
-				Color color = new Color(imagenBf.getRGB(i, h));
+		for(int i = 0; i < imagenBf[currentImage].getWidth();i++) {
+			for(int h =0; h < imagenBf[currentImage].getHeight();h++) {
+				Color color = new Color(imagenBf[currentImage].getRGB(i, h));
 				int red = color.getRed();
 				int blue = color.getBlue();
 				int green = color.getGreen();
@@ -678,9 +691,10 @@ public class Entorno implements ImageObserver  {
 				if(green < 0) green = 0;
 				if(green > 255) green = 255;
 				color = new Color(red, green, blue);
-				imagenBf.setRGB(i, h, color.getRGB());
+				imagenBf[currentImage].setRGB(i, h, color.getRGB());
 			}
 		}
+		notifyChange();
 		updateIcon();
 	}
 
@@ -695,97 +709,104 @@ public class Entorno implements ImageObserver  {
 	}
 	
 	public void espejoHorizontal(){
-		BufferedImage buffered = new BufferedImage(imagenBf.getWidth(), imagenBf.getHeight(), Image.SCALE_SMOOTH);
-		for(int i = 0; i < imagenBf.getWidth();i++) {
-			for(int h =0; h < imagenBf.getHeight();h++) {
-				Color color = new Color(imagenBf.getRGB(i, h));
-				buffered.setRGB(imagenBf.getWidth() - (i + 1), h, color.getRGB());
+		BufferedImage buffered = new BufferedImage(imagenBf[currentImage].getWidth(), imagenBf[currentImage].getHeight(), Image.SCALE_SMOOTH);
+		for(int i = 0; i < imagenBf[currentImage].getWidth();i++) {
+			for(int h =0; h < imagenBf[currentImage].getHeight();h++) {
+				Color color = new Color(imagenBf[currentImage].getRGB(i, h));
+				buffered.setRGB(imagenBf[currentImage].getWidth() - (i + 1), h, color.getRGB());
 			}
 		}
-		imagenBf = buffered;
+		imagenBf[currentImage] = buffered;
+		notifyChange();
 		updateIcon();
 	}
 	
 	public void espejoVertical(){
-		BufferedImage buffered = new BufferedImage(imagenBf.getWidth(), imagenBf.getHeight(), Image.SCALE_SMOOTH);
-		for(int i = 0; i < imagenBf.getWidth();i++) {
-			for(int h =0; h < imagenBf.getHeight();h++) {
-				Color color = new Color(imagenBf.getRGB(i, h));
-				buffered.setRGB(i, imagenBf.getHeight() - (h + 1), color.getRGB());
+		BufferedImage buffered = new BufferedImage(imagenBf[currentImage].getWidth(), imagenBf[currentImage].getHeight(), Image.SCALE_SMOOTH);
+		for(int i = 0; i < imagenBf[currentImage].getWidth();i++) {
+			for(int h =0; h < imagenBf[currentImage].getHeight();h++) {
+				Color color = new Color(imagenBf[currentImage].getRGB(i, h));
+				buffered.setRGB(i, imagenBf[currentImage].getHeight() - (h + 1), color.getRGB());
 			}
 		}
-		imagenBf = buffered;
+		imagenBf[currentImage] = buffered;
+		notifyChange();
 		updateIcon();
 	}
 	
 	public void transpuesta(){
-		BufferedImage buffered = new BufferedImage(imagenBf.getHeight(), imagenBf.getWidth(), Image.SCALE_SMOOTH);
-		for(int i = 0; i < imagenBf.getWidth();i++) {
-			for(int h =0; h < imagenBf.getHeight();h++) {
-				Color color = new Color(imagenBf.getRGB(i, h));
+		BufferedImage buffered = new BufferedImage(imagenBf[currentImage].getHeight(), imagenBf[currentImage].getWidth(), Image.SCALE_SMOOTH);
+		for(int i = 0; i < imagenBf[currentImage].getWidth();i++) {
+			for(int h =0; h < imagenBf[currentImage].getHeight();h++) {
+				Color color = new Color(imagenBf[currentImage].getRGB(i, h));
 				buffered.setRGB(h, i, color.getRGB());
 			}
 		}
-		imagenBf = buffered;
+		imagenBf[currentImage] = buffered;
+		notifyChange();
 		updateIcon();
 	}
 	
 	public void rot90(){
-		BufferedImage buffered = new BufferedImage(imagenBf.getHeight(), imagenBf.getWidth(), Image.SCALE_SMOOTH);
-		for(int i = 0; i < imagenBf.getWidth();i++) {
-			for(int h =0; h < imagenBf.getHeight();h++) {
-				Color color = new Color(imagenBf.getRGB(i, h));
-				buffered.setRGB(h, imagenBf.getWidth() - (i + 1), color.getRGB());
+		BufferedImage buffered = new BufferedImage(imagenBf[currentImage].getHeight(), imagenBf[currentImage].getWidth(), Image.SCALE_SMOOTH);
+		for(int i = 0; i < imagenBf[currentImage].getWidth();i++) {
+			for(int h =0; h < imagenBf[currentImage].getHeight();h++) {
+				Color color = new Color(imagenBf[currentImage].getRGB(i, h));
+				buffered.setRGB(h, imagenBf[currentImage].getWidth() - (i + 1), color.getRGB());
 			}
 		}
-		imagenBf = buffered;
+		imagenBf[currentImage] = buffered;
+		notifyChange();
 		updateIcon();
 	}
 	
 	public void rot180(){
-		BufferedImage buffered = new BufferedImage(imagenBf.getWidth(), imagenBf.getHeight(), Image.SCALE_SMOOTH);
-		for(int i = 0; i < imagenBf.getWidth();i++) {
-			for(int h =0; h < imagenBf.getHeight();h++) {
-				Color color = new Color(imagenBf.getRGB(i, h));
-				buffered.setRGB(imagenBf.getWidth() - (i + 1), imagenBf.getHeight() - (h + 1), color.getRGB());
+		BufferedImage buffered = new BufferedImage(imagenBf[currentImage].getWidth(), imagenBf[currentImage].getHeight(), Image.SCALE_SMOOTH);
+		for(int i = 0; i < imagenBf[currentImage].getWidth();i++) {
+			for(int h =0; h < imagenBf[currentImage].getHeight();h++) {
+				Color color = new Color(imagenBf[currentImage].getRGB(i, h));
+				buffered.setRGB(imagenBf[currentImage].getWidth() - (i + 1), imagenBf[currentImage].getHeight() - (h + 1), color.getRGB());
 			}
 		}
-		imagenBf = buffered;
+		imagenBf[currentImage] = buffered;
+		notifyChange();
 		updateIcon();
 	}
 	
 	public void rot270(){
-		BufferedImage buffered = new BufferedImage(imagenBf.getHeight(), imagenBf.getWidth(), Image.SCALE_SMOOTH);
-		for(int i = 0; i < imagenBf.getWidth();i++) {
-			for(int h =0; h < imagenBf.getHeight();h++) {
-				Color color = new Color(imagenBf.getRGB(i, h));
-				buffered.setRGB(imagenBf.getHeight() - (h + 1), i, color.getRGB());
+		BufferedImage buffered = new BufferedImage(imagenBf[currentImage].getHeight(), imagenBf[currentImage].getWidth(), Image.SCALE_SMOOTH);
+		for(int i = 0; i < imagenBf[currentImage].getWidth();i++) {
+			for(int h =0; h < imagenBf[currentImage].getHeight();h++) {
+				Color color = new Color(imagenBf[currentImage].getRGB(i, h));
+				buffered.setRGB(imagenBf[currentImage].getHeight() - (h + 1), i, color.getRGB());
 			}
 		}
-		imagenBf = buffered;
+		imagenBf[currentImage] = buffered;
+		notifyChange();
 		updateIcon();
 	}
 	
 	public void escalado(int w, int h){
-		Image image = imagenBf.getScaledInstance(w, h, Image.SCALE_SMOOTH);
+		Image image = imagenBf[currentImage].getScaledInstance(w, h, Image.SCALE_SMOOTH);
 		BufferedImage buffered = new BufferedImage(w, h, Image.SCALE_SMOOTH);
 		buffered.getGraphics().drawImage(image, 0, 0 , null);
-		imagenBf = buffered;
+		imagenBf[currentImage] = buffered;
+		notifyChange();
 		updateIcon();
 	}
 	
 	public void rotate(int grados){
 		double radians = (prevrot + grados) * Math.PI / 180;
 		prevrot+=grados;
-		int nw = Math.abs((int)Math.floor( (Math.cos(radians) * imagenBf.getWidth() + Math.sin(radians) * imagenBf.getHeight())));
-		int nh = Math.abs((int)Math.floor(Math.cos(radians) * imagenBf.getHeight() + Math.sin(radians) * imagenBf.getWidth()));
+		int nw = Math.abs((int)Math.floor( (Math.cos(radians) * imagenBf[currentImage].getWidth() + Math.sin(radians) * imagenBf[currentImage].getHeight())));
+		int nh = Math.abs((int)Math.floor(Math.cos(radians) * imagenBf[currentImage].getHeight() + Math.sin(radians) * imagenBf[currentImage].getWidth()));
 		BufferedImage buffered = new BufferedImage(nw, nh, Image.SCALE_SMOOTH);
 		Graphics2D g2d = buffered.createGraphics();
 		AffineTransform transform = new AffineTransform();
-		transform.translate((nw - imagenBf.getWidth())/2, (nh - imagenBf.getHeight())/2);
-	    transform.rotate(radians, imagenBf.getWidth()/2, imagenBf.getHeight()/2);
+		transform.translate((nw - imagenBf[currentImage].getWidth())/2, (nh - imagenBf[currentImage].getHeight())/2);
+	    transform.rotate(radians, imagenBf[currentImage].getWidth()/2, imagenBf[currentImage].getHeight()/2);
 	    g2d.setTransform(transform);
-	    g2d.drawImage(imagenBf, 0, 0, this);
+	    g2d.drawImage(imagenBf[currentImage], 0, 0, this);
         g2d.dispose();
 	    //transform.rotate(radians, imagenBf.getWidth()/2, imagenBf.getHeight()/2);
 	    //AffineTransformOp op = new AffineTransformOp(transform, AffineTransformOp.TYPE_BILINEAR);
@@ -833,6 +854,32 @@ public class Entorno implements ImageObserver  {
 			cambiarContrasteCondicionado(contraste, min[i], max[i] );
 			cambiarBrilloCondicionado(dif, min[i], max[i]);
 		}
+	}
+	
+	public void undo(){
+		if(currentImage > 0) currentImage--;
+		updateIcon();
+	}
+	
+	public void redo(){
+		if(currentImage < 9) currentImage++;
+		updateIcon();
+	}
+	
+	public void notifyChange(){
+		BufferedImage aux[] = new BufferedImage[10];
+		for(int i = 0; i < 9; i++){
+			int ref = currentImage - (8 - i);
+				if(ref < 0) ref = 0;
+				if(ref > currentImage) ref = currentImage;
+				Image image = imagenBf[ref].getScaledInstance(imagenBf[ref].getWidth(), imagenBf[ref].getHeight(), Image.SCALE_SMOOTH);
+				aux[i] = new BufferedImage(imagenBf[ref].getWidth(), imagenBf[ref].getHeight(), Image.SCALE_SMOOTH);
+				aux[i].getGraphics().drawImage(image, 0, 0 , null);
+		}
+		for(int i = 0; i < 9; i++){
+			imagenBf[i] = aux[i];
+		}
+		currentImage = 9;
 	}
 
 }

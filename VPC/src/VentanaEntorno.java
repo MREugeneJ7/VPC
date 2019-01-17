@@ -62,7 +62,7 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 	private JPanel panelContenido, panelHistograma;
 	private JButton openImage, histograma, color, acumulativo , aceptar, aceptar1, aceptar2, aceptar3, aceptar4, aceptar5, aceptar6, imagenDiferencia, guardar, aceptar7, escalado;
 	private JLabel imagen, datos, posRaton;
-	private JComboBox transformacionesLineales, transformacionesNoLineales, operacionesHistograma, rotaciones;
+	private JComboBox transformacionesLineales, transformacionesNoLineales, operacionesHistograma, rotaciones, editar;
 	private JCheckBox red, green, blue;
 	private JTextField valor, valor1, newMin[], newMax[], min[], max[];
 	private final JFileChooser fc = new JFileChooser();
@@ -268,11 +268,17 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 		}else if(e.getSource() == aceptar8){
 			int grados = Integer.parseInt(valor.getText());
 			backEnd.rotate(grados);
+		}else if(e.getSource() == editar){
+			if((editar.getSelectedItem()).equals("undo")){
+				backEnd.undo();
+			}else{
+				backEnd.redo();
+			}
 		}
 		//backEnd.updateIcon();
 		imagen.setIcon(backEnd.getImagen());
 		datos.setText("Tipo:" + backEnd.getType() + " Bits:" + backEnd.getBits() + " " +  
-				backEnd.getImagen().getIconWidth() + "x" + backEnd.getImagen().getIconHeight() + 
+				backEnd.getImagenBf().getWidth() + "x" + backEnd.getImagenBf().getHeight() + 
 				" Min:" + backEnd.getMin() + " Max:" + backEnd.getMax() + 
 				" brillo:" + backEnd.getBrillo() + " Contraste:" + backEnd.getContraste());
 		pack();
@@ -800,6 +806,8 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 		operacionesHistograma = new JComboBox(listado2);
 		String[] listado3 = {"Espejo Horizontal", "Espejo Vertical", "traspuesta", "rotar 90",  "rotar 180",  "rotar 270", "rotar"};
 		rotaciones = new JComboBox(listado3);
+		String[] listado4 = {"undo", "redo"};
+		editar = new JComboBox(listado4);
 		
 		openImage.addActionListener(this);
 		guardar.addActionListener(this);
@@ -810,6 +818,7 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 		transformacionesNoLineales.addActionListener(this);
 		operacionesHistograma.addActionListener(this);
 		rotaciones.addActionListener(this);
+		editar.addActionListener(this);
 		escalado.addActionListener(this);
 		
 		imagen.addMouseListener(this);
@@ -829,7 +838,9 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 						.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
 								.addComponent(color)
 								.addComponent(escalado))
-						.addComponent(acumulativo)
+						.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+								.addComponent(acumulativo)
+								.addComponent(editar))
 						.addComponent(transformacionesLineales)
 						.addComponent(transformacionesNoLineales)
 						.addComponent(operacionesHistograma)
@@ -854,7 +865,9 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 						.addGroup(layout.createSequentialGroup()
 								.addComponent(color)
 								.addComponent(escalado))
-						.addComponent(acumulativo)
+						.addGroup(layout.createSequentialGroup()
+								.addComponent(acumulativo)
+								.addComponent(editar))
 						.addComponent(transformacionesLineales)
 						.addComponent(transformacionesNoLineales)
 						.addComponent(operacionesHistograma)
@@ -930,8 +943,8 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 	}
 	
 	public void mouseMoved(MouseEvent e){
-		//Color c = new Color(backEnd.getImagenBf().getRGB(e.getX(), e.getY()));
-		//posRaton.setText("| X:" + e.getX() + " Y:" + e.getY() + " R:" + c.getRed() + " G:" + c.getGreen() + " B:" + c.getBlue());
+		Color c = new Color(backEnd.getImagenBf().getRGB(e.getX(), e.getY()));
+		posRaton.setText("| X:" + e.getX() + " Y:" + e.getY() + " R:" + c.getRed() + " G:" + c.getGreen() + " B:" + c.getBlue());
 	}
 
 	@Override
