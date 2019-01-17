@@ -74,8 +74,31 @@ public class Entorno implements ImageObserver  {
 
 	private double calcContrast() {
 		// TODO Auto-generated method stub
-		if (brillo == 0) return 1;
-		return (maxLum - minLum) / brillo;
+		long[] histograma = new long[256];
+		final int w = imagenBf[currentImage].getWidth();
+        final int h = imagenBf[currentImage].getHeight();
+        Raster raster = imagenBf[currentImage].getRaster();
+        double[] r = new double[w * h +1];
+        r = raster.getSamples(0, 0, w, h, 0, r);
+        double[] greenSamples = null;
+        double[] blueSamples = null;
+        r = raster.getSamples(0, 0, w, h, 0, r);
+        double[] redSamples = r.clone();
+        if(bits != 8){
+        	r = raster.getSamples(0, 0, w, h, 1, r);
+        	greenSamples = r.clone();
+        	r = raster.getSamples(0, 0, w, h, 2, r);
+        	blueSamples = r.clone();
+        }
+        histograma = ArrayMaths.Histograma(redSamples);
+	    if(bits != 8) {
+	    	double[] calculos = r;
+	    	calculos = ArrayMaths.multiply(r, 0.33);
+	    	calculos = ArrayMaths.Add(calculos ,ArrayMaths.multiply(greenSamples, 0.33));
+	    	calculos = ArrayMaths.Add(calculos ,ArrayMaths.multiply(blueSamples, 0.33));
+	    	histograma = ArrayMaths.Histograma(calculos);
+	    }
+		return ArrayMaths.TypicalDeviation(histograma, brillo);
 	}
 
 	private int calcBrillo() {

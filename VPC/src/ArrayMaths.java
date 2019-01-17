@@ -123,4 +123,16 @@ public class ArrayMaths {
 		return (int) (lumAcum/acum);
 	}
 
+	public static double TypicalDeviation(long[] histograma, int brillo) {
+		// TODO Auto-generated method stub
+		int average = brillo;
+		double contAcum = 0;
+		long acum = 0;
+		for(int i = 0; i < histograma.length; i++) {
+			contAcum += histograma[i] * Math.pow((i - average), 2);
+			acum += histograma[i];
+		}
+		return Math.sqrt(contAcum/(acum - 1));
+	}
+
 }
