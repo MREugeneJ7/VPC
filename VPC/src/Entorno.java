@@ -98,7 +98,7 @@ public class Entorno implements ImageObserver  {
 	    	calculos = ArrayMaths.Add(calculos ,ArrayMaths.multiply(blueSamples, 0.33));
 	    	histograma = ArrayMaths.Histograma(calculos);
 	    }
-		return ArrayMaths.TypicalDeviation(histograma, brillo);
+		return ArrayMaths.TypicalDeviation(histograma, brillo, w * h);
 	}
 
 	private int calcBrillo() {
