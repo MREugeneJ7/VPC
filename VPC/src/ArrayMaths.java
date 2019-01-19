@@ -141,7 +141,7 @@ public class ArrayMaths {
 			//System.out.println(pI);
 			if(pI > 0) contAcum += pI * (Math.log(pI)/Math.log(2));
 		}
-		return contAcum;
+		return -contAcum;
 	}
 
 }
