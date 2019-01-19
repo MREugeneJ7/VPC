@@ -133,4 +133,15 @@ public class ArrayMaths {
 		return Math.sqrt(contAcum/(j - 1));
 	}
 
+	public static double Entropy(long[] histograma, int j) {
+		// TODO Auto-generated method stub
+		double contAcum = 0;
+		for(int i = 0; i < histograma.length; i++) {
+			double pI = (double) (histograma[i])/j;
+			//System.out.println(pI);
+			if(pI > 0) contAcum += pI * (Math.log(pI)/Math.log(2));
+		}
+		return contAcum;
+	}
+
 }

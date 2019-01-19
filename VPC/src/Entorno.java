@@ -47,7 +47,7 @@ public class Entorno implements ImageObserver  {
 	private BufferedImage[] imagenBf;
 	private String direccion,tipoImagen;
 	private int bits, color, maxLum, minLum, brillo, currentImage;
-	private double contrast;
+	private double contrast, entropy;
 	private HistogramDataset histogramDataset;
 	private DefaultCategoryDataset acumDataset;
 	private Linea seleccion;
@@ -69,7 +69,37 @@ public class Entorno implements ImageObserver  {
 		maxLum = calcMax();
 		brillo = calcBrillo();
 		contrast = calcContrast();
+		entropy = calcEntr();
 		updateIcon();
+	}
+
+	private double calcEntr() {
+		// TODO Auto-generated method stub
+		long[] histograma = new long[256];
+		final int w = imagenBf[currentImage].getWidth();
+        final int h = imagenBf[currentImage].getHeight();
+        Raster raster = imagenBf[currentImage].getRaster();
+        double[] r = new double[w * h +1];
+        r = raster.getSamples(0, 0, w, h, 0, r);
+        double[] greenSamples = null;
+        double[] blueSamples = null;
+        r = raster.getSamples(0, 0, w, h, 0, r);
+        double[] redSamples = r.clone();
+        if(bits != 8){
+        	r = raster.getSamples(0, 0, w, h, 1, r);
+        	greenSamples = r.clone();
+        	r = raster.getSamples(0, 0, w, h, 2, r);
+        	blueSamples = r.clone();
+        }
+        histograma = ArrayMaths.Histograma(redSamples);
+	    if(bits != 8) {
+	    	double[] calculos = r;
+	    	calculos = ArrayMaths.multiply(r, 0.33);
+	    	calculos = ArrayMaths.Add(calculos ,ArrayMaths.multiply(greenSamples, 0.33));
+	    	calculos = ArrayMaths.Add(calculos ,ArrayMaths.multiply(blueSamples, 0.33));
+	    	histograma = ArrayMaths.Histograma(calculos);
+	    }
+		return ArrayMaths.Entropy(histograma, w * h);
 	}
 
 	private double calcContrast() {
@@ -903,6 +933,12 @@ public class Entorno implements ImageObserver  {
 			imagenBf[i] = aux[i];
 		}
 		currentImage = 9;
+	}
+
+	public double getEntropia() {
+		// TODO Auto-generated method stub
+		entropy = calcEntr();
+		return entropy;
 	}
 
 }

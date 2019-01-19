@@ -92,10 +92,6 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 				try {
 					path = file.getAbsolutePath();
 					backEnd = new Entorno(file.getAbsolutePath());
-					datos.setText("Tipo:" + backEnd.getType() + " Bits:" + backEnd.getBits() + " " +  
-							backEnd.getImagen().getIconWidth() + "x" + backEnd.getImagen().getIconHeight() + 
-							" Min:" + backEnd.getMin() + " Max:" + backEnd.getMax() + 
-							" brillo:" + backEnd.getBrillo() + " Contraste:" + backEnd.getContraste());
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block
 					Aplicacion.logger.log(Level.WARNING, "No se pudo abrir la imagen", e1);
@@ -280,7 +276,8 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 		datos.setText("Tipo:" + backEnd.getType() + " Bits:" + backEnd.getBits() + " " +  
 				backEnd.getImagenBf().getWidth() + "x" + backEnd.getImagenBf().getHeight() + 
 				" Min:" + backEnd.getMin() + " Max:" + backEnd.getMax() + 
-				" brillo:" + backEnd.getBrillo() + " Contraste:" + backEnd.getContraste());
+				" brillo:" + backEnd.getBrillo() + " Contraste:" + backEnd.getContraste() +
+				" Entropia:" + backEnd.getEntropia());
 		pack();
 	}
 
