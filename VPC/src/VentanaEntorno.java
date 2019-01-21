@@ -124,18 +124,12 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 			if(j==0) j = 1;
 			else j = 0;
 		} else if(e.getSource() == transformacionesLineales) {
-			if((transformacionesLineales.getSelectedItem()).equals("brillo")){
-				b = new JFrame("Brillo");
+			if((transformacionesLineales.getSelectedItem()).equals("brillo y contraste")){
+				b = new JFrame("Brillo y Contraste");
 		        b.add(crearPaneBrillo());
 		        b.pack();
 		        b.setLocationRelativeTo(null);
 		        b.setVisible(true);
-			} else if((transformacionesLineales.getSelectedItem()).equals("contraste")) {
-				c = new JFrame("Contraste");
-		        c.add(crearPaneContraste());
-		        c.pack();
-		        c.setLocationRelativeTo(null);
-		        c.setVisible(true);
 			}else if((transformacionesLineales.getSelectedItem()).equals("Escala de grises")) backEnd.grayScale();
 			else if((transformacionesLineales.getSelectedItem()).equals("Negativo")) backEnd.negative();
 			else if((transformacionesLineales.getSelectedItem()).equals("Daltonismo")) {
@@ -153,12 +147,11 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 		        tf.setVisible(true);
 			}
 		} else if (e.getSource()==aceptar){
+			float contraste = Float.parseFloat(valor1.getText());
+			backEnd.cambiarContraste(contraste);
 			int brillo = Integer.parseInt(valor.getText());
 			backEnd.cambiarBrillo(brillo);
-		} else if (e.getSource()==aceptar1) {
-			float contraste = Float.parseFloat(valor.getText());
-			backEnd.cambiarContraste(contraste);
-		} else if (e.getSource() == aceptar2){
+		}else if (e.getSource() == aceptar2){
 			int newMin[] = new int[this.newMin.length];
 			int newMax[] = new int[this.newMin.length];
 			int min[] = new int[newMin.length];
@@ -753,7 +746,11 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 		layout.setAutoCreateGaps(true);
 		layout.setAutoCreateContainerGaps(true);
 		JLabel brilloActual = new JLabel(backEnd.getBrillo() + " + ");
+		JLabel contrasteActual = new JLabel(backEnd.getContraste() + " * ");
 		valor = new JTextField(10);
+		valor1 = new JTextField(10);
+		valor.setText("0");
+		valor1.setText("1");
 		aceptar = new JButton("Aceptar");
 		
 		aceptar.addActionListener(this);
@@ -763,16 +760,24 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 				.addGroup(layout.createSequentialGroup()
 						.addComponent(brilloActual)
 						.addComponent(valor)
-						.addComponent(aceptar)
 						)
+				.addGroup(layout.createSequentialGroup()
+						.addComponent(contrasteActual)
+						.addComponent(valor1)
+						)
+				.addComponent(aceptar)
 				);
 		layout.setVerticalGroup(
 				layout.createSequentialGroup()
 				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
 						.addComponent(brilloActual)
 						.addComponent(valor)
-						.addComponent(aceptar)
 						)
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+						.addComponent(contrasteActual)
+						.addComponent(valor1)
+						)
+				.addComponent(aceptar)
 				);
 		
 		return panelContenido;
@@ -795,7 +800,7 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 		datos = new JLabel("");
 		posRaton = new JLabel("");
 		imagen = new JLabel();
-		String[] listado = {"brillo","contraste", "Transformacion Lineal", "Escala de grises", "Negativo", "Daltonismo"};
+		String[] listado = {"brillo y contraste", "Transformacion Lineal", "Escala de grises", "Negativo", "Daltonismo"};
 		transformacionesLineales = new JComboBox(listado);
 		String[] listado1 = {"Gamma"};
 		transformacionesNoLineales = new JComboBox(listado1);
