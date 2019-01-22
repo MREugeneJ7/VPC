@@ -59,7 +59,7 @@ public class ArrayMaths {
 		return ds;
 	}
 
-	private static long[] Acumulativo(long[] intensidad) {
+	public static long[] Acumulativo(long[] intensidad) {
 		// TODO Auto-generated method stub
 		for(int i = 1; i < intensidad.length; i++) {
 				intensidad[i] += intensidad[i-1];
