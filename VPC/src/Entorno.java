@@ -50,7 +50,7 @@ public class Entorno implements ImageObserver  {
 	private double contrast, entropy;
 	private HistogramDataset histogramDataset;
 	private DefaultCategoryDataset acumDataset;
-	private Linea seleccion;
+	private Seleccion seleccion;
 	//private JTextField valor;
 	//private JButton aceptar;
 	private int prevrot;
@@ -64,7 +64,7 @@ public class Entorno implements ImageObserver  {
 		currentImage = 9;
 		bits = imagenBf[currentImage].getColorModel().getPixelSize();
 		
-		seleccion = new Linea(imagenBf[currentImage].getHeight()*imagenBf[currentImage].getWidth());
+		seleccion = new Seleccion(imagenBf[currentImage].getWidth(),imagenBf[currentImage].getHeight());
 		minLum = calcMin();
 		maxLum = calcMax();
 		brillo = calcBrillo();
@@ -248,24 +248,32 @@ public class Entorno implements ImageObserver  {
 
 	public void borrarSeleccion() {
 		// TODO Auto-generated method stub
-		seleccion = new Linea(imagenBf[currentImage].getHeight()*imagenBf[currentImage].getWidth());
+		seleccion.clear();
 		
 	}
 
 	public void mostrarSeleccion() throws IOException {
 		// TODO Auto-generated method stub
-		imagen = new ImageIcon(imagenBf[currentImage]);
-		BufferedImage imgaux = ImageIO.read(new File(direccion));
-		for(int i=0; i< seleccion.getLastIndex();i++) {
-			Coordenada aux = seleccion.getCoordenada(i);
-			imgaux.setRGB(aux.getX(), aux.getY(), 0);
+		Image imagen = imagenBf[currentImage].getScaledInstance(imagenBf[currentImage].getWidth(), imagenBf[currentImage].getHeight(), Image.SCALE_SMOOTH);
+		BufferedImage imgaux = new BufferedImage(imagenBf[currentImage].getWidth(), imagenBf[currentImage].getHeight(), Image.SCALE_SMOOTH);
+		imgaux.getGraphics().drawImage(imagen, 0, 0 , null);
+		if(seleccion.isSelected()){
+			for(int i=seleccion.getComienzo().getX(); i< seleccion.getFin().getX();i++) {
+				imgaux.setRGB(i, seleccion.getComienzo().getY(), 0);
+				imgaux.setRGB(i, seleccion.getFin().getY()-1, 0);
+			}
+			for(int i=seleccion.getComienzo().getY(); i< seleccion.getFin().getY();i++) {
+				imgaux.setRGB(seleccion.getComienzo().getX(), i, 0);
+				imgaux.setRGB(seleccion.getFin().getX()-1,i, 0);
+			}
 		}
-		imagen = new ImageIcon(imgaux);
+		this.imagen = new ImageIcon(imgaux);
+		
 	}
 
 	public boolean seleccionVacia() {
 		// TODO Auto-generated method stub
-		return (seleccion.getLastIndex() == 0);
+		return (seleccion.isSelected());
 	}
 
 	public void psicoldelia() {
@@ -294,8 +302,8 @@ public class Entorno implements ImageObserver  {
 	
 	public void cambiarBrillo(int brillo) {
 		// TODO Auto-generated method stub
-		for(int i = 0; i < imagenBf[currentImage].getWidth();i++) {
-			for(int j =0; j < imagenBf[currentImage].getHeight();j++) {
+		for(int i = seleccion.getComienzo().getX(); i < seleccion.getFin().getX();i++) {
+			for(int j =seleccion.getComienzo().getY(); j < seleccion.getFin().getY();j++) {
 				Color color = new Color(imagenBf[currentImage].getRGB(i, j));
 				int red = color.getRed();
 				int blue = color.getBlue();
@@ -331,8 +339,8 @@ public class Entorno implements ImageObserver  {
 	public void cambiarContraste(float contraste) {
 		// TODO Auto-generated method stub
 		int brilloAntiguo = new Integer(brillo);
-		for(int i = 0; i < imagenBf[currentImage].getWidth();i++) {
-			for(int j =0; j < imagenBf[currentImage].getHeight();j++) {
+		for(int i = seleccion.getComienzo().getX(); i < seleccion.getFin().getX();i++) {
+			for(int j =seleccion.getComienzo().getY(); j < seleccion.getFin().getY();j++) {
 				Color color = new Color(imagenBf[currentImage].getRGB(i, j));
 				int red = color.getRed();
 				int blue = color.getBlue();
@@ -358,8 +366,8 @@ public class Entorno implements ImageObserver  {
 
 	public void gamma(double gamma) {
 		// TODO Auto-generated method stub
-		for(int i = 0; i < imagenBf[currentImage].getWidth();i++) {
-			for(int j =0; j < imagenBf[currentImage].getHeight();j++) {
+		for(int i = seleccion.getComienzo().getX(); i < seleccion.getFin().getX();i++) {
+			for(int j =seleccion.getComienzo().getY(); j < seleccion.getFin().getY();j++) {
 				Color color = new Color(imagenBf[currentImage].getRGB(i, j));
 				int red = color.getRed();
 
@@ -581,8 +589,8 @@ public class Entorno implements ImageObserver  {
 
 	public void grayScale() {
 		// TODO Auto-generated method stub
-		for(int i = 0; i < imagenBf[currentImage].getWidth();i++) {
-			for(int j =0; j < imagenBf[currentImage].getHeight();j++) {
+		for(int i = seleccion.getComienzo().getX(); i < seleccion.getFin().getX();i++) {
+			for(int j =seleccion.getComienzo().getY(); j < seleccion.getFin().getY();j++) {
 				Color color = new Color(imagenBf[currentImage].getRGB(i, j));
 				int red = color.getRed();
 				int blue = color.getBlue();
@@ -619,8 +627,8 @@ public class Entorno implements ImageObserver  {
 
 	public void negative() {
 		// TODO Auto-generated method stub
-		for(int i = 0; i < imagenBf[currentImage].getWidth();i++) {
-			for(int j =0; j < imagenBf[currentImage].getHeight();j++) {
+		for(int i = seleccion.getComienzo().getX(); i < seleccion.getFin().getX();i++) {
+			for(int j =seleccion.getComienzo().getY(); j < seleccion.getFin().getY();j++) {
 				Color color = new Color(imagenBf[currentImage].getRGB(i, j));
 				int red = color.getRed();
 				int blue = color.getBlue();
@@ -634,8 +642,8 @@ public class Entorno implements ImageObserver  {
 	}
 
 	public void daltonismo(int selector) {
-		for(int i = 0; i < imagenBf[currentImage].getWidth();i++) {
-			for(int j =0; j < imagenBf[currentImage].getHeight();j++) {
+		for(int i = seleccion.getComienzo().getX(); i < seleccion.getFin().getX();i++) {
+			for(int j =seleccion.getComienzo().getY(); j < seleccion.getFin().getY();j++) {
 				Color color = new Color(imagenBf[currentImage].getRGB(i, j));
 				int red = color.getRed();
 				int blue = color.getBlue();
@@ -669,8 +677,8 @@ public class Entorno implements ImageObserver  {
 
 	private void cambiarContrasteCondicionado(float contraste, int j, int k) {
 		// TODO Auto-generated method stub
-		for(int i = 0; i < imagenBf[currentImage].getWidth();i++) {
-			for(int h =0; h < imagenBf[currentImage].getHeight();h++) {
+		for(int i = seleccion.getComienzo().getX(); i < seleccion.getFin().getX();i++) {
+			for(int h =seleccion.getComienzo().getY(); h < seleccion.getFin().getY();h++) {
 				Color color = new Color(imagenBf[currentImage].getRGB(i, h));
 				int red = color.getRed();
 				int blue = color.getBlue();
@@ -694,8 +702,8 @@ public class Entorno implements ImageObserver  {
 
 	private void cambiarBrilloCondicionado(int brillo, int j, int k) {
 		// TODO Auto-generated method stub
-		for(int i = 0; i < imagenBf[currentImage].getWidth();i++) {
-			for(int h =0; h < imagenBf[currentImage].getHeight();h++) {
+		for(int i = seleccion.getComienzo().getX(); i < seleccion.getFin().getX();i++) {
+			for(int h =seleccion.getComienzo().getY(); h < seleccion.getFin().getY();h++) {
 				Color color = new Color(imagenBf[currentImage].getRGB(i, h));
 				int red = color.getRed();
 				int blue = color.getBlue();
@@ -728,11 +736,13 @@ public class Entorno implements ImageObserver  {
 	}
 	
 	public void espejoHorizontal(){
+		Image image = imagenBf[currentImage].getScaledInstance(imagenBf[currentImage].getWidth(), imagenBf[currentImage].getHeight(), Image.SCALE_SMOOTH);
 		BufferedImage buffered = new BufferedImage(imagenBf[currentImage].getWidth(), imagenBf[currentImage].getHeight(), Image.SCALE_SMOOTH);
-		for(int i = 0; i < imagenBf[currentImage].getWidth();i++) {
-			for(int h =0; h < imagenBf[currentImage].getHeight();h++) {
+		buffered.getGraphics().drawImage(image, 0, 0 , null);
+		for(int i = seleccion.getComienzo().getX(); i < seleccion.getFin().getX();i++) {
+			for(int h =seleccion.getComienzo().getY(); h < seleccion.getFin().getY();h++) {
 				Color color = new Color(imagenBf[currentImage].getRGB(i, h));
-				buffered.setRGB(imagenBf[currentImage].getWidth() - (i + 1), h, color.getRGB());
+				buffered.setRGB(seleccion.getComienzo().getX() + seleccion.getFin().getX() - (i + 1), h, color.getRGB());
 			}
 		}
 		imagenBf[currentImage] = buffered;
@@ -741,11 +751,13 @@ public class Entorno implements ImageObserver  {
 	}
 	
 	public void espejoVertical(){
+		Image image = imagenBf[currentImage].getScaledInstance(imagenBf[currentImage].getWidth(), imagenBf[currentImage].getHeight(), Image.SCALE_SMOOTH);
 		BufferedImage buffered = new BufferedImage(imagenBf[currentImage].getWidth(), imagenBf[currentImage].getHeight(), Image.SCALE_SMOOTH);
-		for(int i = 0; i < imagenBf[currentImage].getWidth();i++) {
-			for(int h =0; h < imagenBf[currentImage].getHeight();h++) {
+		buffered.getGraphics().drawImage(image, 0, 0 , null);
+		for(int i = seleccion.getComienzo().getX(); i < seleccion.getFin().getX();i++) {
+			for(int h =seleccion.getComienzo().getY(); h < seleccion.getFin().getY();h++) {
 				Color color = new Color(imagenBf[currentImage].getRGB(i, h));
-				buffered.setRGB(i, imagenBf[currentImage].getHeight() - (h + 1), color.getRGB());
+				buffered.setRGB(i, seleccion.getComienzo().getY() + seleccion.getFin().getY() - (h + 1), color.getRGB());
 			}
 		}
 		imagenBf[currentImage] = buffered;
@@ -760,7 +772,7 @@ public class Entorno implements ImageObserver  {
 				Color color = new Color(imagenBf[currentImage].getRGB(i, h));
 				buffered.setRGB(h, i, color.getRGB());
 			}
-		}
+		}	
 		imagenBf[currentImage] = buffered;
 		notifyChange();
 		updateIcon();

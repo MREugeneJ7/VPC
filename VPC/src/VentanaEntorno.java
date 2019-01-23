@@ -907,7 +907,17 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 
 	@Override
 	public void mouseClicked(MouseEvent e) {
-		
+		backEnd.guardarSeleccion(e);
+		try {
+			backEnd.mostrarSeleccion();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		imagen.setIcon(backEnd.getImagen());
+		//backEnd.borrarSeleccion();
+		//imagen.setIcon(backEnd.getImagen());
+		pack();
 	}
 
 	@Override
@@ -919,16 +929,7 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 	@Override
 	public void mouseReleased(MouseEvent e) {
 		// TODO Auto-generated method stub
-		/*try {
-			backEnd.mostrarSeleccion();
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		imagen.setIcon(backEnd.getImagen());
-		backEnd.borrarSeleccion(); */
-		imagen.setIcon(backEnd.getImagen());
-		pack();
+		
 		
 	}
 
