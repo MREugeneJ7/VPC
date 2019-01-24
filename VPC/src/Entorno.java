@@ -479,17 +479,21 @@ public class Entorno implements ImageObserver  {
 
 	public void specifyHisotgram(String path) throws IOException {
 		// TODO Auto-generated method stub
+		
+        double[] greenSamples = null,greenSamples1 = null;
+        double[] blueSamples = null,blueSamples1 = null;
+        
 		BufferedImage imagenObjetivo;
 		imagenObjetivo = ImageIO.read(new File(path));
-		if(imagenObjetivo.getColorModel().getPixelSize() != bits) {
+		if(imagenObjetivo.getColorModel().getPixelSize() != imagenBf[currentImage].getColorModel().getPixelSize()) {
 			System.out.println("no se puede especificar el historgrama de dos imagenes con distinto tama�o de pixel");
 			return;
 		}
-		long[][] histograma = new long[3][256];
-		long[][] histogramaObjetivo = new long[3][256];
+		double[][] histograma = new double[3][256];
+		double[][] histogramaObjetivo = new double[3][256];
 		if (bits == 8) {
-			histograma = new long[1][256];
-			histogramaObjetivo = new long[1][256];
+			histograma = new double[1][256];
+			histogramaObjetivo = new double[1][256];
 		}
 		
 		
@@ -497,92 +501,60 @@ public class Entorno implements ImageObserver  {
         final int h = imagenBf[currentImage].getHeight();
         Raster raster = imagenBf[currentImage].getRaster();
         Raster rasterObjetivo = imagenObjetivo.getRaster();
-        double[] r = new double[w * h +1];
-	    histograma[0] = ArrayMaths.Histograma(raster.getSamples(0, 0, w, h, 0, r));
-	    histogramaObjetivo[0] = ArrayMaths.Histograma(rasterObjetivo.getSamples(0, 0, w, h, 0, r));
+        double[] r = new double[w * h +1], r1 = new double[w * h +1];
+        r = raster.getSamples(0, 0, w, h, 0, r);
+        double[] redSamples = r.clone();
+        r1 = rasterObjetivo.getSamples(0, 0, w, h, 0, r);
+        double[] redSamples1 = r1.clone();
+        if(bits != 8){
+        	r = raster.getSamples(0, 0, w, h, 1, r);
+        	greenSamples = r.clone();
+        	r1 = rasterObjetivo.getSamples(0, 0, w, h, 1, r1);
+        	greenSamples1 = r1.clone();
+        	r = raster.getSamples(0, 0, w, h, 2, r);
+        	blueSamples = r.clone();
+        	r1 = rasterObjetivo.getSamples(0, 0, w, h, 2, r1);
+        	blueSamples1 = r1.clone();
+        }
+	    histograma[0] = ArrayMaths.multiply(ArrayMaths.toDouble(ArrayMaths.HistogramaAcumulativo(redSamples)), (1.0/w*h));
+	    histogramaObjetivo[0] = ArrayMaths.multiply(ArrayMaths.toDouble(ArrayMaths.HistogramaAcumulativo(redSamples1)), (1.0/w*h));
 	    if(bits!=8) {
-		    histograma[1] = ArrayMaths.Histograma(raster.getSamples(0, 0, w, h, 1, r));
-		    histograma[2] = ArrayMaths.Histograma(raster.getSamples(0, 0, w, h, 2, r));
-		    histogramaObjetivo[1] = ArrayMaths.Histograma(rasterObjetivo.getSamples(0, 0, w, h, 1, r));
-		    histogramaObjetivo[2] = ArrayMaths.Histograma(rasterObjetivo.getSamples(0, 0, w, h, 2, r));
+		    histograma[1] = ArrayMaths.multiply(ArrayMaths.toDouble(ArrayMaths.HistogramaAcumulativo(greenSamples)), (1.0/w*h));
+		    histograma[2] = ArrayMaths.multiply(ArrayMaths.toDouble(ArrayMaths.HistogramaAcumulativo(greenSamples1)), (1.0/w*h));
+		    histogramaObjetivo[1] = ArrayMaths.multiply(ArrayMaths.toDouble(ArrayMaths.HistogramaAcumulativo(blueSamples)), (1.0/w*h));
+		    histogramaObjetivo[2] = ArrayMaths.multiply(ArrayMaths.toDouble(ArrayMaths.HistogramaAcumulativo(blueSamples1)), (1.0/w*h));
 	    }
+	    int[][] tablaTransformacion = new int[bits/8][256];
+	    int cont =0;
 	    for(int i = 0; i < bits/8; i++)
 	    	for(int j = 0; j < histograma[i].length; j++) {
-	    		System.out.println(i + " " + j);
-	    		long diff = 0;
-	    		if(j < histogramaObjetivo[i].length) diff = histograma[i][j] - histogramaObjetivo[i][j];
-	    		int x = 0, y = 0;
-	    		while((diff != 0) && (y < h)) {
-	    			Color rgb = new Color(imagenBf[currentImage].getRGB(x, y));
-	    			int aux = 0;
-	    			switch (i) {
-	    			case 0:	
-	    				if(bits == 8) {
-	    					aux = rgb.getRed();
-		    				if((diff < 0) && (aux > j)) {
-			    				rgb = new Color(j , j, j );
-			    				diff++;
-			    				histograma[i][aux]--;
-			    				imagenBf[currentImage].setRGB(x, y, rgb.getRGB());
-			    			}else if((diff > 0) && (aux == j)) {
-			    				int random = (int)(Math.random() * (histograma[i].length - j)) + j;
-			    				rgb = new Color(random , random, random );
-			    				diff--;
-			    				histograma[i][random]++;
-			    				imagenBf[currentImage].setRGB(x, y, rgb.getRGB());
-			    			}
-	    				}
-	    				else {
-		    				aux = rgb.getRed();
-		    				if((diff < 0) && (aux > j)) {
-			    				rgb = new Color(j , rgb.getGreen(), rgb.getBlue() );
-			    				diff++;
-			    				histograma[i][aux]--;
-			    				imagenBf[currentImage].setRGB(x, y, rgb.getRGB());
-			    			}else if((diff > 0) && (aux == j)) {
-			    				int random = (int)(Math.random() * (histograma[i].length - j)) + j;
-			    				rgb = new Color(random , rgb.getGreen(), rgb.getBlue() );
-			    				diff--;
-			    				histograma[i][random]++;
-			    				imagenBf[currentImage].setRGB(x, y, rgb.getRGB());
-			    			}
-	    				}
-	    			case 1:
-	    				aux = rgb.getGreen();
-	    				if((diff < 0) && (aux > j)) {
-		    				rgb = new Color(rgb.getRed() , j, rgb.getBlue() );
-		    				diff++;
-		    				if(aux < histograma[i].length && aux > 0)  histograma[i][aux]--;
-		    				imagenBf[currentImage].setRGB(x, y, rgb.getRGB());
-		    			}else if((diff > 0) && (aux == j)) {
-		    				int random = (int)(Math.random() * (histograma[i].length - j)) + j;
-		    				rgb = new Color(rgb.getRed() , random, rgb.getBlue() );
-		    				diff--;
-		    				histograma[i][random]++;
-		    				imagenBf[currentImage].setRGB(x, y, rgb.getRGB());
-		    			}
-	    			case 2:
-	    				aux = rgb.getBlue();
-	    				if((diff < 0) && (aux > j)) {
-		    				rgb = new Color(rgb.getRed() , rgb.getGreen(), j );
-		    				diff++;
-		    				if(aux < histograma[i].length && aux > 0) histograma[i][aux]--;
-		    				imagenBf[currentImage].setRGB(x, y, rgb.getRGB());
-		    			}else if((diff > 0) && (aux == j)) {
-		    				int random = (int)(Math.random() * (histograma[i].length - j)) + j;
-		    				rgb = new Color(rgb.getRed() , rgb.getGreen(), random );
-		    				diff--;
-		    				histograma[i][random]++;
-		    				imagenBf[currentImage].setRGB(x, y, rgb.getRGB());
-		    			}
-	    			}
-	    			x++;
-	    			if((x == w) && (y < h) ) {
-	    				x = 0;
-	    				y++;
-	    			}
+	    		System.out.println("Proceso:" + (double)(cont/((bits/8)*256))*100 + "%");
+	    		int x = 255;
+	    		while((x>=0)&&(histograma[i][j] <= histogramaObjetivo[i][x])) {
+	    			tablaTransformacion[i][j] = x;
+	    			x--;
+	    			cont++;
 	    		}
+	    		
+	    }
+	    for(int i = 0; i < imagenBf[currentImage].getWidth();i++) {
+			for(int j =0; j < imagenBf[currentImage].getHeight();j++) {
+	    			Color rgb = new Color(imagenBf[currentImage].getRGB(i, j));
+	    			int red = rgb.getRed();
+	    			int green = rgb.getGreen();
+	    			int blue = rgb.getBlue();
+	    			red = tablaTransformacion[0][red];
+	    			if(bits == 8) {
+	    				rgb = new Color(red,red,red);
+	    				imagenBf[currentImage].setRGB(i, j, rgb.getRGB());
+	    			}else {
+	    				green = tablaTransformacion[1][green];
+	    				blue = tablaTransformacion[1][blue];
+	    				rgb = new Color(red,green,blue);
+	    				imagenBf[currentImage].setRGB(i, j, rgb.getRGB());
+	    			}
 	    	}
+	    }
 	    notifyChange();
 	    updateIcon();
 	}
