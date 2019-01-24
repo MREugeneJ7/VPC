@@ -520,21 +520,21 @@ public class Entorno implements ImageObserver  {
 	    histogramaObjetivo[0] = ArrayMaths.multiply(ArrayMaths.toDouble(ArrayMaths.HistogramaAcumulativo(redSamples1)), (1.0/w*h));
 	    if(bits!=8) {
 		    histograma[1] = ArrayMaths.multiply(ArrayMaths.toDouble(ArrayMaths.HistogramaAcumulativo(greenSamples)), (1.0/w*h));
-		    histograma[2] = ArrayMaths.multiply(ArrayMaths.toDouble(ArrayMaths.HistogramaAcumulativo(greenSamples1)), (1.0/w*h));
-		    histogramaObjetivo[1] = ArrayMaths.multiply(ArrayMaths.toDouble(ArrayMaths.HistogramaAcumulativo(blueSamples)), (1.0/w*h));
+		    histogramaObjetivo[1] = ArrayMaths.multiply(ArrayMaths.toDouble(ArrayMaths.HistogramaAcumulativo(greenSamples1)), (1.0/w*h));
+		    histograma[2] = ArrayMaths.multiply(ArrayMaths.toDouble(ArrayMaths.HistogramaAcumulativo(blueSamples)), (1.0/w*h));
 		    histogramaObjetivo[2] = ArrayMaths.multiply(ArrayMaths.toDouble(ArrayMaths.HistogramaAcumulativo(blueSamples1)), (1.0/w*h));
 	    }
 	    int[][] tablaTransformacion = new int[bits/8][256];
 	    int cont =0;
 	    for(int i = 0; i < bits/8; i++)
 	    	for(int j = 0; j < histograma[i].length; j++) {
-	    		System.out.println("Proceso:" + (double)(cont/((bits/8)*256))*100 + "%");
+	    		System.out.println("Proceso:" + ((double)cont/((bits*256)/8))*100 + "%");
 	    		int x = 255;
 	    		while((x>=0)&&(histograma[i][j] <= histogramaObjetivo[i][x])) {
 	    			tablaTransformacion[i][j] = x;
 	    			x--;
-	    			cont++;
 	    		}
+	    		cont++;
 	    		
 	    }
 	    for(int i = 0; i < imagenBf[currentImage].getWidth();i++) {
@@ -549,7 +549,7 @@ public class Entorno implements ImageObserver  {
 	    				imagenBf[currentImage].setRGB(i, j, rgb.getRGB());
 	    			}else {
 	    				green = tablaTransformacion[1][green];
-	    				blue = tablaTransformacion[1][blue];
+	    				blue = tablaTransformacion[2][blue];
 	    				rgb = new Color(red,green,blue);
 	    				imagenBf[currentImage].setRGB(i, j, rgb.getRGB());
 	    			}
