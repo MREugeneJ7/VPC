@@ -799,10 +799,10 @@ public class Entorno implements ImageObserver  {
 	}
 	
 	public void rotate(int grados){
-		double radians = (prevrot + grados) * Math.PI / 180;
-		prevrot+=grados;
-		int nw = Math.abs((int)Math.floor( (Math.cos(radians) * imagenBf[currentImage].getWidth() + Math.sin(radians) * imagenBf[currentImage].getHeight())));
-		int nh = Math.abs((int)Math.floor(Math.cos(radians) * imagenBf[currentImage].getHeight() + Math.sin(radians) * imagenBf[currentImage].getWidth()));
+		double radians = (-grados)*Math.PI/180;
+		double posradians = Math.abs(radians);
+		int nw = Math.abs((int)Math.floor( (Math.cos(posradians) * imagenBf[currentImage].getWidth() + Math.sin(posradians) * imagenBf[currentImage].getHeight())));
+		int nh = Math.abs((int)Math.floor(Math.cos(posradians) * imagenBf[currentImage].getHeight() + Math.sin(posradians) * imagenBf[currentImage].getWidth()));
 		BufferedImage buffered = new BufferedImage(nw, nh, Image.SCALE_SMOOTH);
 		Graphics2D g2d = buffered.createGraphics();
 		AffineTransform transform = new AffineTransform();
@@ -811,10 +811,57 @@ public class Entorno implements ImageObserver  {
 	    g2d.setTransform(transform);
 	    g2d.drawImage(imagenBf[currentImage], 0, 0, this);
         g2d.dispose();
-	    //transform.rotate(radians, imagenBf.getWidth()/2, imagenBf.getHeight()/2);
-	    //AffineTransformOp op = new AffineTransformOp(transform, AffineTransformOp.TYPE_BILINEAR);
-	    //imagenBf = op.filter(imagenBf, null);
-        imagen = new ImageIcon(buffered);
+	    //transform.rotate(radians, imagenBf[currentImage].getWidth()/2, imagenBf[currentImage].getHeight()/2);
+	    AffineTransformOp op = new AffineTransformOp(transform, AffineTransformOp.TYPE_BILINEAR);
+	    imagenBf[currentImage] = op.filter(imagenBf[currentImage], null);
+	    deleteUselessInfo();
+	    notifyChange();
+		updateIcon();
+        //imagen = new ImageIcon(buffered);
+	}
+
+	private void deleteUselessInfo() {
+		// TODO Auto-generated method stub
+		boolean found = false;
+		int topX = 0, topY = 0, bottomX = 0, bottomY = 0;
+		for(int i = 0; i < imagenBf[currentImage].getWidth();i++) {
+			for(int h =0; h < imagenBf[currentImage].getHeight();h++) {
+				if(imagenBf[currentImage].getRGB(i, h) != 0 && !found) {
+					topX = i;
+					found = true;
+				}
+			}
+		}
+		found = false;
+		for(int i = 0; i < imagenBf[currentImage].getHeight();i++) {
+			for(int h =0; h < imagenBf[currentImage].getWidth();h++) {
+				if(imagenBf[currentImage].getRGB(h, i) != 0 && !found) {
+					topY = i;
+					found = true;
+				}
+			}
+		}
+		found = false;
+		for(int i = imagenBf[currentImage].getHeight() - 1; i >= 0;i--) {
+			for(int h =imagenBf[currentImage].getWidth() - 1; h >= 0 ;h--) {
+				if(imagenBf[currentImage].getRGB(h, i) != 0 && !found) {
+					bottomY = i;
+					found = true;
+				}
+			}
+		}
+		found = false;
+		for(int i = imagenBf[currentImage].getWidth() - 1; i >= 0;i--) {
+			for(int h =imagenBf[currentImage].getHeight() - 1; h >= 0 ;h--) {
+				if(imagenBf[currentImage].getRGB(i, h) != 0 && !found) {
+					bottomX = i;
+					found = true;
+				}
+			}
+		}
+		imagenBf[currentImage] = imagenBf[currentImage].getSubimage(topX, topY, bottomX-topX, bottomY-topY);
+		System.out.println("Splice from:" + topX + "x"+ topY + "to" + bottomX + "x" + bottomY);
+		
 	}
 
 	@Override
