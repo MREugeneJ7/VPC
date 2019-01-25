@@ -7,10 +7,12 @@ import java.util.Map;
 
 import javax.swing.JPanel;
 
-import org.jfree.chart.JFreeChart;
-
 public class Chart extends JPanel {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	protected static final int MIN_BAR_WIDTH = 4;
     private Map<Integer, Integer> mapHistory;
 

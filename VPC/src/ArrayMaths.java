@@ -40,6 +40,7 @@ public class ArrayMaths {
 		return max;
 	}
 
+	@SuppressWarnings("unused")
 	private static double[] append(double[] raster, double[] put) {
 		// TODO Auto-generated method stub
 		double[] rv = new double[raster.length+put.length];
@@ -53,6 +54,7 @@ public class ArrayMaths {
 		return rv;
 	}
 
+	@SuppressWarnings("unused")
 	private static double[] put(int j, double[] ds) {
 		// TODO Auto-generated method stub
 		for(int i = 0; i < ds.length; i++) ds[i] = j;

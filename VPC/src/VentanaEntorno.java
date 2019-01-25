@@ -1,8 +1,6 @@
 import javax.imageio.ImageIO;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.DataLine;
 import javax.sound.sampled.SourceDataLine;
 import javax.swing.*;
 import javax.swing.GroupLayout.ParallelGroup;
@@ -11,10 +9,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableModel;
-
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -26,25 +20,16 @@ import org.jfree.chart.renderer.xy.XYBarRenderer;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.statistics.HistogramDataset;
-import org.jfree.data.xy.IntervalXYDataset;
-
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Image;
 import java.awt.Paint;
-import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.event.*;
-import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * IA Pract1
@@ -60,9 +45,9 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 	private static final long serialVersionUID = 1L;
 	private Entorno backEnd;
 	private JPanel panelContenido, panelHistograma;
-	private JButton openImage, histograma, color, acumulativo , aceptar, aceptar1, aceptar2, aceptar3, aceptar4, aceptar5, aceptar6, imagenDiferencia, guardar, aceptar7, escalado;
+	private JButton openImage, histograma, color, acumulativo , aceptar, aceptar2, aceptar3, aceptar4, aceptar5, aceptar6, imagenDiferencia, guardar, aceptar7, escalado;
 	private JLabel imagen, datos, posRaton;
-	private JComboBox transformacionesLineales, transformacionesNoLineales, operacionesHistograma, rotaciones, editar;
+	private JComboBox<String> transformacionesLineales, transformacionesNoLineales, operacionesHistograma, rotaciones, editar;
 	private JCheckBox red, green, blue;
 	private JTextField valor, valor1, newMin[], newMax[], min[], max[];
 	private final JFileChooser fc = new JFileChooser();
@@ -73,7 +58,7 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 	protected SourceDataLine sourceDataLine;
 	protected boolean stopPlayback = false, isAcumulativo = false;
 	private XYBarRenderer renderer;
-	private JFrame h, b, c, tf, g, d, e, dt, tff, es;
+	private JFrame h, b, tf, g, d, e, dt, tff, es;
 	private String path;
 	private JFrame r;
 	private JButton aceptar8;
@@ -602,38 +587,6 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 		return panelContenido;
 	}
 
-	private Component crearPaneContraste() {
-		JPanel panelContenido = new JPanel();
-		GroupLayout layout = new GroupLayout(panelContenido);
-		panelContenido.setLayout(layout);
-		layout.setAutoCreateGaps(true);
-		layout.setAutoCreateContainerGaps(true);
-		JLabel contrasteActual = new JLabel(backEnd.getContraste() + " * ");
-		valor = new JTextField(10);
-		aceptar1 = new JButton("Aceptar");
-		
-		aceptar1.addActionListener(this);
-		
-		layout.setHorizontalGroup(
-				layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-				.addGroup(layout.createSequentialGroup()
-						.addComponent(contrasteActual)
-						.addComponent(valor)
-						.addComponent(aceptar1)
-						)
-				);
-		layout.setVerticalGroup(
-				layout.createSequentialGroup()
-				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-						.addComponent(contrasteActual)
-						.addComponent(valor)
-						.addComponent(aceptar1)
-						)
-				);
-		
-		return panelContenido;
-	}
-
 	private ChartPanel crearPanelHistograma() {
 		// TODO Auto-generated method stub
 		JFreeChart chart = null;
@@ -801,15 +754,15 @@ public class VentanaEntorno extends JFrame implements ActionListener, TableModel
 		posRaton = new JLabel("");
 		imagen = new JLabel();
 		String[] listado = {"brillo y contraste", "Transformacion Lineal", "Escala de grises", "Negativo", "Daltonismo"};
-		transformacionesLineales = new JComboBox(listado);
+		transformacionesLineales = new JComboBox<String>(listado);
 		String[] listado1 = {"Gamma"};
-		transformacionesNoLineales = new JComboBox(listado1);
+		transformacionesNoLineales = new JComboBox<String>(listado1);
 		String[] listado2 = {"Ecualizar" , "Diferencia", "Especificar"};
-		operacionesHistograma = new JComboBox(listado2);
+		operacionesHistograma = new JComboBox<String>(listado2);
 		String[] listado3 = {"Espejo Horizontal", "Espejo Vertical", "traspuesta", "rotar 90",  "rotar 180",  "rotar 270", "rotar"};
-		rotaciones = new JComboBox(listado3);
+		rotaciones = new JComboBox<String>(listado3);
 		String[] listado4 = {"undo", "redo"};
-		editar = new JComboBox(listado4);
+		editar = new JComboBox<String>(listado4);
 		
 		openImage.addActionListener(this);
 		guardar.addActionListener(this);

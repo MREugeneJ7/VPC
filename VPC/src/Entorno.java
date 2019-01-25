@@ -1,12 +1,8 @@
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Image;
-import java.awt.Paint;
 import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
@@ -15,29 +11,10 @@ import java.awt.image.ImageObserver;
 import java.awt.image.Raster;
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.logging.Level;
-
 import javax.imageio.ImageIO;
-import javax.print.DocFlavor.URL;
-import javax.swing.GroupLayout;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-
-import org.jfree.chart.ChartFactory;
-import org.jfree.chart.ChartPanel;
-import org.jfree.chart.JFreeChart;
-import org.jfree.chart.plot.DefaultDrawingSupplier;
-import org.jfree.chart.plot.PlotOrientation;
-import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.renderer.xy.StandardXYBarPainter;
-import org.jfree.chart.renderer.xy.XYBarRenderer;
-import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.category.DefaultCategoryDataset;
-import org.jfree.data.general.Dataset;
 import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.IntervalXYDataset;
 
@@ -51,10 +28,7 @@ public class Entorno implements ImageObserver  {
 	private HistogramDataset histogramDataset;
 	private DefaultCategoryDataset acumDataset;
 	private Seleccion seleccion;
-	//private JTextField valor;
-	//private JButton aceptar;
-	private int prevrot;
-
+	
 	public Entorno(String absolutePath) throws IOException {
 		direccion = absolutePath;
 		imagen = new ImageIcon(absolutePath);
@@ -338,7 +312,7 @@ public class Entorno implements ImageObserver  {
 
 	public void cambiarContraste(float contraste) {
 		// TODO Auto-generated method stub
-		int brilloAntiguo = new Integer(brillo);
+		int brilloAntiguo = Integer.valueOf(brillo);
 		for(int i = seleccion.getComienzo().getX(); i < seleccion.getFin().getX();i++) {
 			for(int j =seleccion.getComienzo().getY(); j < seleccion.getFin().getY();j++) {
 				Color color = new Color(imagenBf[currentImage].getRGB(i, j));
